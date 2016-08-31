@@ -1,0 +1,138 @@
+
+======================================
+ ÖÖGA Open-source Gazetracker 
+ 
+ INSTALLATION Instructions
+ 
+======================================
+
+(c) FIOH 2015, 2016
+
+Version history
+---------------
+0.1	2015-06-23	KL	First version (Win only)
+0.2	2015-08-18	KL	Updated for Boost and OpenCV 3.0 (still just Win)
+0.3	2016-08-31 KL	included instructions about VS/Boost versions
+
+------
+INTRO
+------
+ÖÖGA makes use of the following 3rd party modules:
+- OpenCV 3.0
+- Boost libraries
+- Eigen
+- GSL
+
+Additionally OpenCV computations might get a boost from installing Intel TBB's
+
+NOTE! Should you want to go full X64, you should modify the below accordingly. This is thus far just for compiling the Win32 versions.
+
+On Windows, ÖÖGA must be currently compiled under  VS2013 Update 5
+- Might also work on an older version <1.59 of Boost
+- Update available here (https://www.microsoft.com/en-us/download/confirmation.aspx?id=48129)
+- Without update 5 Boost 1.61 gives leads to a general fail on some templated types
+	https://svn.boost.org/trac/boost/ticket/11924
+	https://svn.boost.org/trac/boost/ticket/11885
+- The use of gsl (Gnu Scientific Library) necessitates VS2013 as there were some breaking changes between VS2013 and VS2015. Hopefully this will be remedied in the near future.
+
+--------------
+Install Boost:
+--------------
+Boost is a mostly header library that doesn't need compilation. However, we're using at least boost::thread and boost::timer, which require compiling on your specific architecture/compiler.
+
+	1. Get the latest version at http://www.boost.org, and unpack to your chosen directory
+
+	Windows / VS 2013
+
+		2. Start up VS2013 Developer Command Prompt (Visual Studio Tools -> Developer Command Prompt), and go to the location you unpacked boost
+		3. Run >bootstrap.bat to initialize the boost.build system
+		4. Run b2 with options (see b2 --help), for instance
+			b2 install --prefix="c:\dev\boost" --buildtype=complete --build-dir="c:\dev\boost\build" toolset=msvc-12.0 variant=release,debug link=shared -j4
+			that is, b2 install 
+					--prefix="c:\dev\boost" 				the target dir
+					--buildtype=complete 				
+					--build-dir="c:\dev\boost\build" 	temp build dir
+					toolset=msvc-12.0 						toolset, this corresponds to VS2013 compiler
+					variant=release,debug 				both variants
+					link=shared 								make DLLs
+					model=x86, or x64						memory model
+					-j4												use 4 cores for compiling (faster)
+		5. Take a nap, have a cup of coffee, watch a few movies. This will take a while.
+
+		6. Add Boost folder to proper places in your project configuration / makefiles. Also, to enable access to the DLLs from the IDE, add the boost\lib folder with DLLs to your environment path (VS2013 -> Project properties -> Debugging -> environment -> path=%path%;C:\dev\boost\lib
+		
+	Linux
+	
+		... TBD ...
+
+
+--------------
+Install Eigen
+--------------
+
+- CMake EIGEN_DL_DIR -> EIGEN_INSTALL_DIR
+- add qmake.exe location
+- change cmake_install_prefix
+- Configure, Generate
+- VS2013 -> Build EIGEN_INSTALL_DIR\Eigen\Install.vcxproj
+- end up with EIGEN_INSTALL_DIR\include ...
+- VS2013 -> Build EIGEN_INSTALL_DIR\unsupported\Install.vcxproj  
+  -> this adds EIGEN_INSTALL_DIR\include\unsupported directory needed with something under OpenCV
+- VS2013 -> Build INSTALL?
+
+---------------
+Install OpenCV:
+---------------
+
+	1. Get OpenCV 3.0 from http://www.opencv.org
+	2. Get CMake from http://www.cmake.org/download/
+
+	Windows:
+	
+		3. Run CMake-GUI, 
+		- set source code to path-to-opencv\sources
+		- set binary path to wherever
+		- press Configure
+			- set at least the following options:
+				- WITH_EIGEN, WITH_OPENGL, WITH_OPENCL, (WITH_QT if using?)
+				- configure paths to Eigen (and QT?)
+		- Generate, select generator accordingly (CMake will probably prompt for this)
+		- correct mistakes
+		- Generate until satisfied
+		
+		4. Open Visual Studio 2013, Open the generated OpenCV solution file
+		5. Build both Debug and Release versions of ALL_BUILD
+		6. Build both Debug and Release versions of INSTALL
+
+		Add the OpenCV folder to proper places in your project configuration / makefiles. Also, to enable access to the DLLs from the IDE, add the OpenCV\bin folder with DLLs to your environment path (VS2013 -> Project properties -> Debugging -> environment -> path=%path%;C:\Dev\opencv3\bin\install\x86\vc12\bin )
+		
+------------------------------------------
+Install OpenCL (this is still a bit open)
+------------------------------------------
+
+This seems to be hardware vendor specific. For Intel (integrated) GPUs, the OpenCL SDK and runtimes only come bundled with Intel INDE, which needs registration and downloading from 
+However, OpenCV might work even without these (include the necessary OpenCL stuff)?
+
+-------------------------------------------
+Install Intel TBB
+-------------------------------------------
+TBD
+
+-------------------------------------------
+Install gsl
+-------------------------------------------
+
+Windows
+- Investigate: 
+  - https://github.com/ampl/gsl
+  - http://gnuwin32.sourceforge.net/packages/gsl.htm
+  - https://customwingsl2015.codeplex.com/
+  
+  
+  
+  NOTES TO SELF
+  - changed boost from 1.61 to 1.59, path was boost\msvc14\... 1_61
+
+
+
+
