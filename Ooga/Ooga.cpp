@@ -93,7 +93,7 @@
 
 		grabber->AddCamera(FrameSrc(i), cams[i]);
 		// (int)FrameSrc(i)]); 
-		//todo: addcamera doesn't use the frame identifier, just pushes them in order called, how should this work to get the right feed to the right tracker?
+		// TODO addcamera doesn't use the frame identifier, just pushes them in order called, how should this work to get the right feed to the right tracker?
 	}
 
 	//setup cv windows

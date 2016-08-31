@@ -1,4 +1,6 @@
-#pragma once
+//#pragma once
+#ifndef GLINT_FINDER_H
+#define GLINT_FINDER_H
 
 const double PI = 3.1415926535898;
 
@@ -65,3 +67,5 @@ private:
 	TPerformanceTimer* pt;
 
 };
+
+#endif

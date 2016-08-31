@@ -1,4 +1,7 @@
-#pragma once
+//#pragma once
+#ifndef FRAME_RATE_LIMITER_H
+#define FRAME_RATE_LIMITER_H
+
 
 #include <chrono>
 #include <vector>
@@ -30,3 +33,4 @@ private:
 
 };
 
+#endif

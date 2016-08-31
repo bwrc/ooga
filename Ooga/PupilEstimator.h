@@ -1,4 +1,6 @@
-#pragma once
+//#pragma once
+#ifndef PUPIL_ESTIMATOR_H
+#define PUPIL_ESTIMATOR_H
 
 #include <opencv2/opencv.hpp>
 
@@ -49,3 +51,4 @@ public:
 
 };
 
+#endif
