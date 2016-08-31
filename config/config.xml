@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<settings>
+	<cameras count="3">
+		<eyeleft type="video">
+			<num>1</num>
+			<file>../videos/cam1.mjpg</file>
+			<cal>eyecal.xml</cal>
+		</eyeleft>
+		<eyeright type="video">
+			<num>2</num>
+			<file>../videos/cam2.mjpg</file>
+			<cal>eyecal.xml</cal>
+		</eyeleft>
+		<scene type="video">
+			<num>3</num>
+			<file>../videos/cam3.mjpg</file>
+			<cal>scenecal.xml</cal>
+		</scene>
+	</cameras>
+	<savefiles>true</savefiles>
+	
+</settings>

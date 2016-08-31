@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{45246619-1075-4F52-8E58-9ED507070CCF}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>Ooga</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>c:\dev\gsl\x86\include;C:\Dev\eigen\include\eigen3;C:\Program Files (x86)\Visual Leak Detector\include;C:\Dev\opencv3\install\install\include;C:\Dev\boost\include\boost-1_59;</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Dev\boost\lib;c:\dev\gsl\x86\lib;C:\Dev\opencv3\install\install\x86\vc14\lib;C:\Program Files (x86)\gevorkyan.org\MicroProfiler;C:\Program Files (x86)\Visual Leak Detector\lib\Win32</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_core300d.lib;opencv_highgui300d.lib;opencv_videoio300d.lib;opencv_imgproc300d.lib;opencv_photo300d.lib;opencv_calib3d300d.lib;gsl.lib;cblas.lib;micro-profiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>LIBCMTD.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>c:\dev\gsl\x86\include;C:\Dev\eigen\include\eigen3;C:\Program Files (x86)\Visual Leak Detector\include;C:\Dev\opencv3\install\install\include;C:\Dev\boost\include\boost-1_59;</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>C:\Dev\boost\lib;c:\dev\gsl\x86\lib;C:\Dev\opencv3\install\install\x86\vc14\lib;C:\Program Files (x86)\gevorkyan.org\MicroProfiler;C:\Program Files (x86)\Visual Leak Detector\lib\Win32</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencv_core300.lib;opencv_highgui300.lib;opencv_videoio300.lib;opencv_imgproc300.lib;opencv_photo300.lib;opencv_calib3d300.lib;gsl.lib;cblas.lib;micro-profiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IgnoreSpecificDefaultLibraries>LIBCMTD.lib</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <Text Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Camera.h" />
+    <ClInclude Include="computePupilCenter3d.h" />
+    <ClInclude Include="Cornea_computer.h" />
+    <ClInclude Include="EyeTracker.h" />
+    <ClInclude Include="FrameBinocular.h" />
+    <ClInclude Include="FrameProcessor.h" />
+    <ClInclude Include="FrameRateLimiter.h" />
+    <ClInclude Include="getPupilCenter.h" />
+    <ClInclude Include="getPupilEllipse.h" />
+    <ClInclude Include="getPupilEllipsePoints.h" />
+    <ClInclude Include="GlintFinder.h" />
+    <ClInclude Include="orderGlints.h" />
+    <ClInclude Include="PerformanceTimer.h" />
+    <ClInclude Include="PupilEstimator.h" />
+    <ClInclude Include="Settings.h" />
+    <ClInclude Include="SG_common.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="VideoIOHandler.h" />
+    <ClInclude Include="VideoWriterNoThread.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="computePupilCenter3d.cpp" />
+    <ClCompile Include="Cornea_computer.cpp" />
+    <ClCompile Include="EyeTracker.cpp" />
+    <ClCompile Include="FrameBinocular.cpp" />
+    <ClCompile Include="FrameProcessor.cpp" />
+    <ClCompile Include="FrameRateLimiter.cpp" />
+    <ClCompile Include="getPupilCenter.cpp" />
+    <ClCompile Include="getPupilEllipse.cpp" />
+    <ClCompile Include="getPupilEllipsePoints.cpp" />
+    <ClCompile Include="GlintFinder.cpp" />
+    <ClCompile Include="Ooga.cpp" />
+    <ClCompile Include="orderGlints.cpp" />
+    <ClCompile Include="PerformanceTimer.cpp" />
+    <ClCompile Include="PupilEstimator.cpp" />
+    <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="VideoIOHandler.cpp" />
+    <ClCompile Include="VideoWriterNoThread.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

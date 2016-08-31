@@ -1,0 +1,32 @@
+Copyright (c) 2016
+Kristian Lukander <kristian.lukander@ttl.fi>, Miika Toivanen <miika.toivanen@ttl.fi>
+Finnish Institute of Occupational Health, Helsinki, Finland
+
+ÖÖGA is currently licensed under the GPLv3 license.
+
+We plan to replace the optimization routines that currently use GNU
+Scientific Library (GSL) with non-GPL optimization functions, after
+which we plan to release the future versions of OOGA under the MIT
+license.
+
+OOGA requires the following projects to compile:
+- [OpenCV](http://opencv.org/) (released under 3-clause ModifiedBSD license)
+- [Eigen](http://eigen.tuxfamily.org/) (released under MPL-2.0 license)
+- [Boost](http://www.boost.org/) (released under the Boost software license)
+- [GSL - GNU Scientific Library](https://www.gnu.org/software/gsl/) for numerical optimization (released under GPLv3)
+
+* * *
+
+FSF [explicitly
+lists](https://www.gnu.org/licenses/license-list.en.html) the
+ModifiedBSD to be compatible with GPLv3.
+
+MPL-2.0 may be compatible with GPLv3. MPL-2.0 licensed files must be
+available for licensing under MPL and copyright notices must remain
+intact. This should be no problem if the project only inlcludes
+unmodified MPL-licensed files. See
+https://www.mozilla.org/en-US/MPL/2.0/combining-mpl-and-gpl/
+
+FSF [explicitly
+lists](https://www.gnu.org/licenses/license-list.en.html) the
+boost to be compatible with GPLv3.

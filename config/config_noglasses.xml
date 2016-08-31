@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<settings>
+	<cameras count="2">
+		<eye type="cam">
+			<num>0</num>
+			<file>videos/eyevideo.avi</file>
+			<cal>eyecal.xml</cal>
+		</eye>
+		<scene type="cam">
+			<num>1</num>
+			<file>videos/scenevideo.avi</file>
+			<cal>scenecal.xml</cal>
+		</scene>
+	</cameras>
+	<test>1</test>
+</settings>

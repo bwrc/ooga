@@ -1,0 +1,6 @@
+%YAML:1.0
+glint_beta: 100
+glint_reg_coef: 1
+pupil_iterate: 0
+pupil_beta: 20
+kalman_R_max: 100

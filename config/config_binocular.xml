@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<settings>
+
+	<!---------------------------------------------------------------------->
+	<!-- registration can be monocular or binocular -->
+	<registration type="binocular"/>
+
+	<!---------------------------------------------------------------------->
+	<!-- 
+	list cameras here, tags: <eye> or <scene>
+		parameters: loc: left, right
+		type: cam, file
+		subtags: 
+			<num> : cam feed number
+			<file>: file name (with path)
+			<cal> : camera calibration file
+	-->
+	<cameras>
+		<eye loc="right" type="cam">
+			<num>1</num>
+			<file>videos/eyevideo.avi</file>
+			<cal>eyecal.xml</cal>
+		</eye>
+		<eye loc="left" type="file">
+			<num>1</num>
+			<file>videos/eyevideo.avi</file>
+			<cal>eyecal.xml</cal>
+		</eye>
+		<scene type="cam">
+			<num>2</num>
+			<file>videos/scenevideo.avi</file>
+			<cal>scenecal.xml</cal>
+		</scene>
+	</cameras>
+
+	<!---------------------------------------------------------------------->
+	<!-- 
+	how to handle the results:
+		<savevideos>1 = yes, 0 = no</savevideos>
+		<videofolder>resvideos/</videofolder>
+		<output>txt</output> <!-- what kind of formats can we use here?
+		<streamdata>1 = yes, 0 = no</streamdata>
+		<LSL streamname="insert stream name" streamtype="VOG"/>
+	-->
+	<results>
+		<savevideos>0</savevideos>
+		<videofolder>resvideos/</videofolder>
+		<output>txt</output>
+		<streamdata>0</streamdata>
+		<LSL streamname="SG_stream" streamtype="VOG"/>
+	</results>
+
+	<!---------------------------------------------------------------------->
+
+</settings>
