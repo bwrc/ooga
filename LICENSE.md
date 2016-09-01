@@ -1,4 +1,4 @@
-Copyright (c) 2016  
+Copyright &copy; 2016  
 Kristian Lukander <kristian.lukander@ttl.fi>  
 Miika Toivanen <miika.toivanen@ttl.fi>  
 Finnish Institute of Occupational Health, Helsinki, Finland
@@ -22,7 +22,7 @@ OOGA is released under the GPLv3 because it currently uses
 optimization routines from the GNU Scientific Library (GSL). We plan
 to replace the GSL routines with non-GPL optimization functions, after
 which the future versions of OOGA are planned to be released under the
-MIT license ( https://opensource.org/licenses/MIT ).
+[MIT license](https://opensource.org/licenses/MIT).
 
 OOGA requires the following projects to compile:
 - [OpenCV](http://opencv.org/) (released under 3-clause ModifiedBSD
