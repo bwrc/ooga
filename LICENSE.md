@@ -25,10 +25,10 @@ which the future versions of OOGA are planned to be released under the
 [MIT license](https://opensource.org/licenses/MIT).
 
 OOGA requires the following projects to compile:
-- [OpenCV](http://opencv.org/) (released under 3-clause ModifiedBSD
-  license)
-- [Eigen](http://eigen.tuxfamily.org/) (released under MPL-2.0 license)
-- [Boost](http://www.boost.org/) (released under the Boost software
-  license)
+- [OpenCV](http://opencv.org/) (released under [ModifiedBSD
+  license](https://www.gnu.org/licenses/license-list.en.html#ModifiedBSD))
+- [Eigen](http://eigen.tuxfamily.org/) (released under [MPL-2.0 license](https://www.gnu.org/licenses/license-list.en.html#MPL-2.0))
+- [Boost](http://www.boost.org/) (released under the [Boost software
+  license](https://www.gnu.org/licenses/license-list.en.html#boost))
 - [GSL - GNU Scientific Library](https://www.gnu.org/software/gsl/) for
-  numerical optimization (released under GPLv3)
+  numerical optimization (released under [GPLv3](https://www.gnu.org/licenses/license-list.en.html#GNUGPL))
