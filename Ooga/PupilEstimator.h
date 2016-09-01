@@ -48,7 +48,6 @@ public:
 	//sobel results
 	cv::Mat imFilt_up, imFilt_down, imFilt_left, imFilt_right;
 
-
 };
 
 #endif

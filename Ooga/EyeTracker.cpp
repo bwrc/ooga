@@ -151,6 +151,12 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	glintfinder = new GlintFinder();
 	glintfinder->Initialize( CM, MU_X, MU_Y, 6 );
 
+	//reset prev for first round
+	for (int i = 0; i < 6; ++i) {
+		glintPoints_prev.push_back(cv::Point2d(0, 0));
+	}
+
+
 }
 
 void EyeTracker::setCropWindowSize(int xmin, int ymin, int width, int height)
@@ -242,17 +248,14 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult &trackres, cv::Poin
 
 	std::vector<cv::Point2d> glintpoints;// (6, cv::Point2d(0, 0));
 	//silly debug, remove (how does miika do this)?
-	for (int i = 0; i < 6; ++i) {
-		glintPoints_prev.push_back(cv::Point2d(0, 0));
-	}
-
-	//miikabugi
-	//std::cerr << "pixel: " << int(diffimg.getMat(cv::ACCESS_READ).at<uchar>(199, 123)) << ", " << diffimg.size() << std::endl;
-	//std::cerr << "pixe2: " << int(diffimg.getMat(cv::ACCESS_READ).at<uchar>(198,124)) << ", " << diffimg.size() << std::endl;
+	//for (int i = 0; i < 6; ++i) {
+	//	glintPoints_prev.push_back(cv::Point2d(0, 0));
+	//}
 
 	//TODO: check MU-args for eyeness (the tracker should relate to one, init function should select)
 	glintpoints = glintfinder->getGlints(diffimg, pupil_center, glintPoints_prev,
 		theta, /*MU_X, MU_Y, CM, moved to glintfinder*/ glint_kernel, score, glint_scores, glint_beta, glint_reg_coef);
+	glintPoints_prev = glintpoints;
 	pt->addTimeStamp("glintpoints");
 
 	std::cout << glintPoints << std::endl;
