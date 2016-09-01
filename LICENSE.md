@@ -18,11 +18,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
     
 * * *
 
-OOGA is released under the GPLv3 because it currently uses
-optimization routines from the GNU Scientific Library (GSL). We plan
-to replace the GSL routines with non-GPL optimization functions, after
-which the future versions of OOGA are planned to be released under the
-[MIT license](https://opensource.org/licenses/MIT).
+OOGA is released under the version 3 of the GNU General Public License
+(GPL) because it currently uses optimization routines from the GNU
+Scientific Library (GSL). We plan to replace the GSL routines with
+non-GPL optimization functions, after which the future versions of
+OOGA are planned to be released under the [MIT
+license](https://opensource.org/licenses/MIT).
 
 OOGA requires the following projects to compile:
 - [OpenCV](http://opencv.org/) (released under [ModifiedBSD
@@ -31,4 +32,4 @@ OOGA requires the following projects to compile:
 - [Boost](http://www.boost.org/) (released under the [Boost software
   license](https://www.gnu.org/licenses/license-list.en.html#boost))
 - [GSL - GNU Scientific Library](https://www.gnu.org/software/gsl/) for
-  numerical optimization (released under [GPLv3](https://www.gnu.org/licenses/license-list.en.html#GNUGPL))
+  numerical optimization (released under [GPL](https://www.gnu.org/licenses/license-list.en.html#GNUGPL))
