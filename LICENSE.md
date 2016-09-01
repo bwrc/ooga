@@ -1,6 +1,6 @@
-Copyright (c) 2016
-Kristian Lukander <kristian.lukander@ttl.fi>
-Miika Toivanen <miika.toivanen@ttl.fi>
+Copyright (c) 2016  
+Kristian Lukander <kristian.lukander@ttl.fi>  
+Miika Toivanen <miika.toivanen@ttl.fi>  
 Finnish Institute of Occupational Health, Helsinki, Finland
 
 OOGA is free software: you can redistribute it and/or modify it under
@@ -25,10 +25,10 @@ which the future versions of OOGA are planned to be released under the
 MIT license ( https://opensource.org/licenses/MIT ).
 
 OOGA requires the following projects to compile:
-- OpenCV, http://opencv.org/ (released under 3-clause ModifiedBSD
+- [OpenCV](http://opencv.org/) (released under 3-clause ModifiedBSD
   license)
-- Eigen, http://eigen.tuxfamily.org/ (released under MPL-2.0 license)
-- Boost, http://www.boost.org/ (released under the Boost software
+- [Eigen](http://eigen.tuxfamily.org/) (released under MPL-2.0 license)
+- [Boost](http://www.boost.org/) (released under the Boost software
   license)
-- GSL - GNU Scientific Library, https://www.gnu.org/software/gsl/ for
+- [GSL - GNU Scientific Library](https://www.gnu.org/software/gsl/) for
   numerical optimization (released under GPLv3)
