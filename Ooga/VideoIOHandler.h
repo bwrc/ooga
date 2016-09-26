@@ -26,7 +26,8 @@ class VideoIOHandler
 public:
 	//Constructor takes a pointer to the processing queue
 	//VideoIOHandler(mc::ReaderWriterQueue<TBinocularFrame *>* procRWQ, std::string recordingName); //camel
-	VideoIOHandler(concurrent_queue<std::shared_ptr<TBinocularFrame>>* procRWQ, std::string recordingName);
+//	VideoIOHandler(concurrent_queue<std::shared_ptr<TBinocularFrame>>* procRWQ, std::string recordingName);
+	VideoIOHandler(BalancingQueue<std::shared_ptr<TBinocularFrame>>* procRWQ, std::string recordingName);
 
 	~VideoIOHandler();
 
@@ -52,7 +53,12 @@ public:
 	void pause();
 	void stop();
 
+	void grabone();
+
+
 private:
+
+	bool grabsingleframe = false; //for debug-grabbing just a single frame at a time
 
 	//boost::thread m_thread;
 	std::thread m_thread;
@@ -62,7 +68,8 @@ private:
 
 	//the processing queue where grabbed frames will be pushed
 	//mc::ReaderWriterQueue<TBinocularFrame *>* procRWQ;
-	concurrent_queue<std::shared_ptr<TBinocularFrame>>* procRWQ;
+//	concurrent_queue<std::shared_ptr<TBinocularFrame>>* procRWQ;
+	BalancingQueue<std::shared_ptr<TBinocularFrame>>* procRWQ;
 
 	std::vector<cv::VideoCapture *> caps;				// pointers to video capture devices 
 

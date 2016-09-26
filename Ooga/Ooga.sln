@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2013 for Windows Desktop
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Ooga", "Ooga.vcxproj", "{45246619-1075-4F52-8E58-9ED507070CCF}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "queueTest", "..\..\queueTest\queueTest\queueTest.vcxproj", "{1062E85B-6656-41C8-9607-D7955AD26003}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{45246619-1075-4F52-8E58-9ED507070CCF}.Debug|Win32.Build.0 = Debug|Win32
 		{45246619-1075-4F52-8E58-9ED507070CCF}.Release|Win32.ActiveCfg = Release|Win32
 		{45246619-1075-4F52-8E58-9ED507070CCF}.Release|Win32.Build.0 = Release|Win32
+		{1062E85B-6656-41C8-9607-D7955AD26003}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1062E85B-6656-41C8-9607-D7955AD26003}.Debug|Win32.Build.0 = Debug|Win32
+		{1062E85B-6656-41C8-9607-D7955AD26003}.Release|Win32.ActiveCfg = Release|Win32
+		{1062E85B-6656-41C8-9607-D7955AD26003}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <iostream>
 
-namespace gt {
+namespace ooga {
 
     static const unsigned int MAX_ITER = 1000;
     static const double PRECISION      = 0.000000000001;
@@ -477,5 +477,5 @@ namespace gt {
     }
 
 
-}    // end of "namespace gt"
+}    // end of "namespace ooga"
 

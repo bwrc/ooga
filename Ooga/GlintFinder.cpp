@@ -1,6 +1,18 @@
 #include "GlintFinder.h"
 
+//#define DEBUGFILE
+
+#ifdef DEBUGFILE
+
+	#include <iostream>
+	#include <fstream>
+
+	static std::ofstream dbgf("debug_stream.txt");
+
+#endif
+
 static bool DO_PERF_T = false;
+
 
 cv::Mat log_mvnpdf(cv::Mat x, cv::Mat mu, cv::Mat C) {
 	// Computes the logarithm of multivariate normal probability density function (mvnpdf) of x with 
@@ -12,7 +24,7 @@ cv::Mat log_mvnpdf(cv::Mat x, cv::Mat mu, cv::Mat C) {
 	float log_norm_factor = -0.5*(2 * log(2 * PI) + log(determinant(C)));
 	cv::Mat invChol = C.clone();
 	Cholesky(invChol.ptr<float>(), invChol.step, invChol.cols, 0, 0, 0);
-	// Opencv's 'Cholesky' returns a bit weard matrix... it's almost the inverse of real cholesky but the off-diagonals must be adjusted:
+	// Opencv's 'Cholesky' returns a bit weird matrix... it's almost the inverse of real cholesky but the off-diagonals must be adjusted:
 	invChol.at<float>(0, 1) = -invChol.at<float>(0, 0)*invChol.at<float>(1, 1)*invChol.at<float>(1, 0);
 	invChol.at<float>(1, 0) = 0;
 
@@ -42,7 +54,9 @@ GlintFinder::~GlintFinder()
 	if (pt != nullptr) {
 		delete pt;
 	}
-
+#ifdef DEBUGFILE
+	dbgf.close();
+#endif
 }
 
 void GlintFinder::Initialize(cv::Mat initCM, float initMU_X[], float initMU_Y[], int muSize)
@@ -437,10 +451,20 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff,
 																						   // if (invert(invC_cond + invC_dyn, C_comb, DECOMP_CHOLESKY) == 0) { printf("getGlints.cpp: C_combined could not be inverted \n");  exit(-1);     }
 					log_prior = log_scaling_factor.at<float>(0, 0) + log_mvnpdf(coords, repeat(C_comb * (invC_cond*mu_cond + invC_dyn*mu_dyn), 1, coords.cols), C_comb).reshape(0, xx.rows);
 					log_scaling_factor_mean = log_scaling_factor_mean + 1.0 / N_leds*double(log_scaling_factor.at<float>(0, 0));
+
+#ifdef DEBUGFILE
+					if (n == 0 && j == 0){
+						dbgf << "mu: " << mu_dyn << std::endl << std::endl
+							<< "ord: " << ORDERS << std::endl << std::endl
+							<< "logp: " << log_prior << std::endl << std::endl
+							<< "logs: " << log_scaling_factor << std::endl << std::endl;
+					}
+#endif
 				}
 
 				if(DO_PERF_T) pt->addTimeStamp("logmvnpdf");
 
+				//this breaks after running a while because log_prior is empty (0x0 matrix)
 				bool bad = isnan(log_prior.at<float>(0, 0)) || isnan(log_prior.at<float>(0, 1)) || isnan(log_prior.at<float>(1, 0)) || isnan(log_prior.at<float>(1, 1));
 				if (bad) {
 					log_prior = log_lhood * 0;
@@ -448,8 +472,6 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff,
 
 				// Compute the logarithm of posterior distribution
 				cv::Mat log_post = log_prior + log_lhood;
-
-				// imshow("post", log_post); waitKey(0);
 
 				// Posterior with the occlusion model (skip this)
 				if (0) {

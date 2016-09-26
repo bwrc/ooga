@@ -4,6 +4,10 @@
 
 #include "getPupilCenter.h"
 
+#include "computePupilCenter3d.h"
+
+#include "SG_common.h"
+
 EyeTracker::EyeTracker()
 {
 	framecounter = 0;
@@ -21,7 +25,7 @@ EyeTracker::~EyeTracker()
 	}
 }
 
-void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string glintmodel_fn)
+void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string glintmodel_fn, std::string K9_matrix_fn)
 {
 	//TODO: read these from setting / function params
 	int cols = 640;
@@ -114,6 +118,13 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 		MU_Y[i] = MU_Y[i] * scale; 
 	}
 
+	cv::FileStorage fs("calibration/parameters.yaml", cv::FileStorage::READ);
+	fs["glint_beta"] >> glint_beta;
+	fs["glint_reg_coef"] >> glint_reg_coef;
+	fs["pupil_iterate"] >> pupil_iterate;
+	fs["pupil_beta"] >> pupil_beta;
+	fs["kalman_R_max"] >> kalman_R_max;
+
 	// LOAD CM
 	cv::Mat CM(N_leds * 2, N_leds * 2, CV_32F);
 
@@ -146,7 +157,37 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	}
 	free(buffer_CM);
 
+	cv::FileStorage k9fs(K9_matrix_fn, cv::FileStorage::READ);
+	if (myEye == FrameSrc::EYE_L) k9fs["K9_left"] >> K9_matrix;
+	else k9fs["K9_right"] >> K9_matrix;
+
 	///////// END LOADING 
+
+	//TODO: Make this make sense
+	//read these from file, select eye for camera
+
+	eyeCam = new Camera();
+
+	if (myEye == FrameSrc::EYE_L){
+		double eye_intr[9] = { 706.016649148281, 0, 0, 0, 701.594050122496, 0, 325.516892970862, 229.074499749446, 1 };
+		double eye_dist[5] = { -0.0592552807088912, -0.356035882388608, -0.00499637342440711, -0.00186924287347176, 0.041261857952091 };
+		eyeCam->setIntrinsicMatrix(eye_intr);
+		eyeCam->setDistortion(eye_dist);
+	}
+	else { // right eye
+		double eye_intr[9] = { 789.311956305243, 0, 0, 0, 785.608590236097, 0, 318.745586281075, 217.585069948245, 1 };
+		double eye_dist[5] = { -0.0683374878811475, -0.57464673534425, 0.00189640729826507, 0.00224588599102401, 0.61174675760327 };
+		eyeCam->setIntrinsicMatrix(eye_intr);
+		eyeCam->setDistortion(eye_dist);
+	}
+
+	
+	// Calibration related stuff
+	//not used?
+	//A_rot = (cv::Mat_<float>(3, 3) << A(0, 0), A(0, 1), A(0, 2), A(1, 0), A(1, 1), A(1, 2), A(2, 0), A(2, 1), A(2, 2));
+	//a_tr = (cv::Mat_<float>(3, 1) << A(0, 3), A(1, 3), A(2, 3));
+	//invA_rot;
+	//cv::invert(A_rot, invA_rot, cv::DECOMP_LU);
 
 	glintfinder = new GlintFinder();
 	glintfinder->Initialize( CM, MU_X, MU_Y, 6 );
@@ -156,6 +197,34 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 		glintPoints_prev.push_back(cv::Point2d(0, 0));
 	}
 
+	pupilestimator = new PupilEstimator();
+	for (int i = 0; i < 4; i++) {
+		pupilEllipsePoints_prev_eyecam[i] = cv::Point2d(0, 0);
+	}
+
+	K9_matrix = cv::Mat::eye(3, 3, K9_matrix.type());
+
+	//TODO: read these from a file (for both eyes)
+
+	//// Set the LED positions (CONSTANT)
+	//  eyecam1
+	Eigen::Vector3d eigLED;
+	if (myEye == FrameSrc::EYE_L){
+		eigLED << 0.019120, 0.001719, 0.029388; led_pos.push_back(eigLED);
+		eigLED << 0.039017, -0.005938, 0.030353; led_pos.push_back(eigLED);
+		eigLED << 0.038431, -0.022589, 0.036882; led_pos.push_back(eigLED);
+		eigLED << 0.004518, -0.027402, 0.042179; led_pos.push_back(eigLED);
+		eigLED << -0.021734, -0.015592, 0.040242; led_pos.push_back(eigLED);
+		eigLED << -0.015582, -0.003276, 0.034835; led_pos.push_back(eigLED);
+	}
+	else if (myEye == FrameSrc::EYE_R) { // new right eye
+		eigLED << -0.020094, 0.002253, 0.017040; led_pos.push_back(eigLED);
+		eigLED << -0.038540, -0.005842, 0.017673; led_pos.push_back(eigLED);
+		eigLED << -0.038744, -0.023562, 0.026000; led_pos.push_back(eigLED);
+		eigLED << -0.003747, -0.026598, 0.033479; led_pos.push_back(eigLED);
+		eigLED << 0.022498, -0.016365, 0.033184; led_pos.push_back(eigLED);
+		eigLED << 0.017009, -0.005323, 0.027025; led_pos.push_back(eigLED);
+	}
 
 }
 
@@ -167,7 +236,7 @@ void EyeTracker::setCropWindowSize(int xmin, int ymin, int width, int height)
 	this->cropsizeY= height;
 }
 
-void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult &trackres, cv::Point3d &pupilCenter3D, cv::Point3d &corneaCenter3D)
+void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Point3d &pupilCenter3D, cv::Point3d &corneaCenter3D)
 {
 	pt->start();
 
@@ -177,7 +246,6 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult &trackres, cv::Poin
 	std::cerr << eyeframe->getMat(cv::ACCESS_READ).size() << std::endl;
 	std::cerr << "pix1: " << int(eyeframe->getMat(cv::ACCESS_READ).at<uchar>(199, 123)) << std::endl;
 	std::cerr << "pix2: " << int(eyeframe->getMat(cv::ACCESS_READ).at<uchar>(198, 124)) << std::endl;
-
 
 	pt->addTimeStamp("converted");
 
@@ -230,15 +298,6 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult &trackres, cv::Poin
 
 	pt->addTimeStamp("pupil center");
 
-	//moved these
-	//float MU_X[6], MU_Y[6];
-	////cv::Mat CM;
-	////this is a debug attempt, remove:
-	////TODOTODO: load CM (etc) from file 
-	//cv::Mat CM(12,12, CV_32F);
-	//CM.setTo(0.5);
-	////end debug attempt
-
 	////TODOTODO: move CM, MU_X, MU_Y (check left and right eye!) to a glintFinder Init function
 
 	double score;
@@ -246,30 +305,127 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult &trackres, cv::Poin
 	float glint_beta = 100.0f;  // The coefficient of the glint likelihood model
 	float glint_reg_coef = 1.0f;   // The initial regularization coefficient for the covariance matrix (if zero, might result in non-valid covariance matrix ---> crash)
 
-	std::vector<cv::Point2d> glintpoints;// (6, cv::Point2d(0, 0));
-	//silly debug, remove (how does miika do this)?
-	//for (int i = 0; i < 6; ++i) {
-	//	glintPoints_prev.push_back(cv::Point2d(0, 0));
-	//}
+	std::vector<cv::Point2d> glintPoints;// (6, cv::Point2d(0, 0));
 
 	//TODO: check MU-args for eyeness (the tracker should relate to one, init function should select)
-	glintpoints = glintfinder->getGlints(diffimg, pupil_center, glintPoints_prev,
+	glintPoints = glintfinder->getGlints(diffimg, pupil_center, glintPoints_prev,
 		theta, /*MU_X, MU_Y, CM, moved to glintfinder*/ glint_kernel, score, glint_scores, glint_beta, glint_reg_coef);
-	glintPoints_prev = glintpoints;
-	pt->addTimeStamp("glintpoints");
 
-	std::cout << glintPoints << std::endl;
+	if (glintPoints.size() == 6){ //only if exactly hardcoded six are found->?
 
-	//TODO: insert tracking results to frame, visualize in main thread
-	if (eyeframe->size().width > 200) {
-		circle(*eyeframe, cv::Point2d(pupil_center.x + cropminX, pupil_center.y + cropminY),
-			6, cv::Scalar(0, 0, 255), -1, 8);
-		for (auto& g : glintpoints) {
-			circle(*eyeframe, cv::Point2d(g.x + cropminX, g.y + cropminY),
-				6, cv::Scalar(255,0,0), -1, 8);
+		glintPoints_prev = glintPoints;
+		pt->addTimeStamp("glintpoints");
 
+		//calculate cornea
+		std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > glint_pos;
+		Eigen::Vector3d eigGlint;
+		for (int i = 0; i < 6; i++) {
+			glintPoints[i].x = glintPoints[i].x + cropminX; //x_min;
+			glintPoints[i].y = glintPoints[i].y + cropminY; // y_min;
+			cv::Point3d glintPoint3d;
+			eyeCam->pixToWorld(glintPoints[i].x, glintPoints[i].y, glintPoint3d);
+			eigGlint << glintPoint3d.x, glintPoint3d.y, glintPoint3d.z;
+			glint_pos.push_back(eigGlint);
 		}
-	}
+
+		//cv::Point3d gazePoint_ecam;
+		//cv::RotatedRect* pupilEllipse = new cv::RotatedRect;
+		cv::RotatedRect pupilEllipse;// = new cv::RotatedRect;
+
+		//getPupilEllipse(opened.getMat(cv::ACCESS_READ), pupil_center, pupil_kernel2, pupil_element, pupil_iterate, pupil_beta);
+		//getPupilEllipse(opened.getMat(cv::ACCESS_READ), pupil_center, pupil_kernel2, pupil_element, pupil_iterate, pupil_beta, pupilEllipse);
+		pupilEllipse = pupilestimator->getPupilEllipse(opened.getMat(cv::ACCESS_READ), pupil_center, pupil_kernel2, pupil_element, pupil_iterate, pupil_beta);
+		//pupilestimator->getPupilEllipse(opened.getMat(cv::ACCESS_READ), pupil_center, pupil_kernel2, pupil_element, pupil_iterate, pupil_beta, *pupilEllipse);
+
+		//TODO move this to pupilestimator for cleansiness?
+		pupilEllipsePoints = getPupilEllipsePoints(pupilEllipse, pupilEllipsePoints_prev_eyecam, double(theta));
+
+		//delete pupilEllipse;
+
+		for (int i = 0; i < 4; i++) {
+			pupilEllipsePoints[i].x = pupilEllipsePoints[i].x + cropminX;
+			pupilEllipsePoints[i].y = pupilEllipsePoints[i].y + cropminY;
+		}
+
+		std::vector<cv::Point3d> pupilEllipsePoints3d;
+		for (int i = 0; i < 4; i++) {
+			cv::Point3d pupilEllipsePoint3d;
+			eyeCam->pixToWorld(pupilEllipsePoints[i].x, pupilEllipsePoints[i].y, pupilEllipsePoint3d);
+			pupilEllipsePoints3d.push_back(pupilEllipsePoint3d);
+		}
+
+		const double gx_guess = 0.01;  // Insert something slightly positive here as otherwise the local solution may be at wrong side of the camera!
+		std::vector<double> guesses(6, gx_guess);
+		double error;
+		Eigen::Vector3d eigCenter;
+
+		ooga::Cornea *cornea = new ooga::Cornea();
+
+		std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > led_pos_sub;
+		std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > glint_pos_sub;
+		std::vector<double> guesses_sub;
+		float glint_score_threshold = 0.1; //0.3;
+		cv::Scalar glint_colors[6];
+
+		for (int i = 0; i < 6; i++) {
+			if (glint_scores[i] > glint_score_threshold) {
+				glint_colors[i] = cv::Scalar(0, 250, 0);
+				glint_pos_sub.push_back(glint_pos[i]);
+				led_pos_sub.push_back(led_pos[i]);
+				guesses_sub.push_back(gx_guess);
+			}
+			else { glint_colors[i] = cv::Scalar(0, 0, 250); }
+		}
+
+		if (glint_pos_sub.size() < 2) {
+			cornea->computeCentre(led_pos, glint_pos, guesses, eigCenter, error);
+		}
+		else {
+			cornea->computeCentre(led_pos_sub, glint_pos_sub, guesses_sub, eigCenter, error);  // Cc3d computer could be score-weighted!
+		}
+		Cc3d.x = eigCenter(0); Cc3d.y = eigCenter(1); Cc3d.z = eigCenter(2);
+
+		/// Compute the 3D pupil center  
+		Pc3d = computePupilCenter3d(pupilEllipsePoints3d, Cc3d);
+
+		/// Compute the pupil-corneal distance vector ("gaze vector") and correct it with K9
+		cv::Point3f gaze_dir = (Pc3d - Cc3d) / float(norm(Pc3d - Cc3d));
+		cv::Mat gaze_dir_mat(gaze_dir);
+		cv::Mat K9_times_gaze_dir_mat;
+
+		K9_times_gaze_dir_mat = K9_matrix * gaze_dir_mat;
+
+		cv::Point3d K9_times_gaze_dir_point(K9_times_gaze_dir_mat.at<float>(0), K9_times_gaze_dir_mat.at<float>(1), K9_times_gaze_dir_mat.at<float>(2));
+		//cv::Point3d K9_times_gaze_dir_point(K9_times_gaze_dir_mat.at<double>(0), K9_times_gaze_dir_mat.at<double>(1), K9_times_gaze_dir_mat.at<double>(2));
+
+		//copy results to tracking results
+		trackres->pupilCenter2D = cv::Point2d(pupil_center.x + cropminX, pupil_center.y + cropminY);
+		trackres->pupilCenter3D = Pc3d;
+		trackres->pupilEllipsePoints.reserve(4);
+		for (int i = 0; i < 4; i++) {
+			trackres->pupilEllipsePoints.push_back(pupilEllipsePoints[i]);
+		}
+		//needs to be corrected for crop
+		trackres->pupilEllipse = cv::RotatedRect(cv::Point2f(pupilEllipse.center.x+cropminX + pupilEllipse.center.y+cropminY), pupilEllipse.size, pupilEllipse.angle);
+
+		trackres->glintPoints = glintPoints;
+		trackres->corneaCenter3D = Cc3d;
+		trackres->gazeDirectionVector = K9_times_gaze_dir_point;
+		trackres->score = score;
+
+		//TODO: insert tracking results to frame, visualize in main thread
+/*		if (eyeframe->size().width > 200) {
+			circle(*eyeframe, cv::Point2d(pupil_center.x + cropminX, pupil_center.y + cropminY),
+				6, cv::Scalar(0, 0, 255), -1, 8);
+			for (auto& g : glintPoints) {
+				circle(*eyeframe, cv::Point2d(g.x, g.y),// + cropminX, g.y + cropminY), <- this was done twice?
+					6, cv::Scalar(255, 0, 0), -1, 8);
+
+			}
+		}
+*/
+	} // if glintpoints.size() == 6
+
 	pt->addTimeStamp("draw");
 
 	//dumping stuff to cout takes 10ms?!

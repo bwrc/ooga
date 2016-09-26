@@ -52,12 +52,14 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>c:\dev\gsl\x86\include;C:\Dev\eigen\include\eigen3;C:\Program Files (x86)\Visual Leak Detector\include;C:\Dev\opencv3\install\install\include;C:\Dev\boost\include\boost-1_59;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\dev\gsl\x86\include;C:\Dev\eigen\include\eigen3;C:\Program Files (x86)\Visual Leak Detector\include;C:\Dev\opencv3\build\include;C:\Dev\boost\include\boost-1_59;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Dev\boost\lib;c:\dev\gsl\x86\lib;C:\Dev\opencv3\install\install\x86\vc14\lib;C:\Program Files (x86)\gevorkyan.org\MicroProfiler;C:\Program Files (x86)\Visual Leak Detector\lib\Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Dev\boost\lib;c:\dev\gsl\x86\lib;C:\Dev\opencv3\bin\install\x86\vc12\lib;C:\Program Files (x86)\gevorkyan.org\MicroProfiler;C:\Program Files (x86)\Visual Leak Detector\lib\Win32</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_core300d.lib;opencv_highgui300d.lib;opencv_videoio300d.lib;opencv_imgproc300d.lib;opencv_photo300d.lib;opencv_calib3d300d.lib;gsl.lib;cblas.lib;micro-profiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -71,14 +73,15 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>c:\dev\gsl\x86\include;C:\Dev\eigen\include\eigen3;C:\Program Files (x86)\Visual Leak Detector\include;C:\Dev\opencv3\install\install\include;C:\Dev\boost\include\boost-1_59;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>c:\dev\gsl\x86\include;C:\Dev\eigen\include\eigen3;C:\Program Files (x86)\Visual Leak Detector\include;C:\Dev\opencv3\build\include;C:\Dev\boost\include\boost-1_59;</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>C:\Dev\boost\lib;c:\dev\gsl\x86\lib;C:\Dev\opencv3\install\install\x86\vc14\lib;C:\Program Files (x86)\gevorkyan.org\MicroProfiler;C:\Program Files (x86)\Visual Leak Detector\lib\Win32</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Dev\boost\lib;c:\dev\gsl\x86\lib;C:\Dev\opencv3\bin\install\x86\vc12\lib;C:\Program Files (x86)\gevorkyan.org\MicroProfiler;C:\Program Files (x86)\Visual Leak Detector\lib\Win32</AdditionalLibraryDirectories>
       <AdditionalDependencies>opencv_core300.lib;opencv_highgui300.lib;opencv_videoio300.lib;opencv_imgproc300.lib;opencv_photo300.lib;opencv_calib3d300.lib;gsl.lib;cblas.lib;micro-profiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib</IgnoreSpecificDefaultLibraries>
     </Link>
@@ -87,6 +90,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\utils\concurrent_queue.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="computePupilCenter3d.h" />
     <ClInclude Include="Cornea_computer.h" />

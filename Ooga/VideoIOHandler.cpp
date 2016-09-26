@@ -4,8 +4,11 @@
 #include "SG_common.h"
 
 //Constructor takes a pointer to the processing queue, and a filename for saving the videos
-VideoIOHandler::VideoIOHandler(concurrent_queue<std::shared_ptr<TBinocularFrame>>* procRWQ, std::string recordingName)
+//VideoIOHandler::VideoIOHandler(concurrent_queue<std::shared_ptr<TBinocularFrame>>* procRWQ, std::string recordingName)
+VideoIOHandler::VideoIOHandler(BalancingQueue<std::shared_ptr<TBinocularFrame>>* procRWQ, std::string recordingName)
 {
+	this->caps.clear();
+
 	this->procRWQ = procRWQ;
 	this->recName = recordingName;
 
@@ -44,6 +47,14 @@ int VideoIOHandler::AddCamera(FrameSrc f, cv::VideoCapture *cap)
 * grabs a frame from all of the cameras as synced as possible
 * returns the number of frames grabbed
 */
+
+void VideoIOHandler::grabone()
+{
+	grabsingleframe = true;
+	if (!(this->pauseGrabbing)){ //if not already paused
+		this->pause(); //this is a toggle, start would try to rerun m_thread
+	}
+}
 
 void VideoIOHandler::GrabFramesInThread()
 {
@@ -112,11 +123,25 @@ void VideoIOHandler::GrabFramesInThread()
 
 				//push frame to queue
 				//procRWQ->enqueue(frame);
-				procRWQ->push(frame);
+//				procRWQ->push(frame);
+				//instead of just pushing,
+				//the balancing queue needs to block if it can't push 
+				//(so as to not skip frames, which could be ok for realtime slow processing while saving all frames?)
+				if (!(procRWQ->try_push(frame))){
+					//sleep for the average frame processing time and then try until it gets through
+					const unsigned long timeToSleep = static_cast<unsigned long>(procRWQ->getAverageConsumerTime());
+					std::cout << "************ IO waiting for: " << timeToSleep << std::endl;
+					std::this_thread::sleep_for(std::chrono::milliseconds(timeToSleep));
+					while (!(procRWQ->try_push(frame))){
+						//waiting for the push to go through (the wait should be enough)
+					}
+				}
 
 				//non-threaded videowrite:
 				//the other option is to have a separate worker thread, or a sep thread for writing
 				//slow disk ops after enqueing the current frame for processing
+
+				//TODO: for balancing queue this could be done while waiting?
 				if (bSaveFrames){
 					writer->write();
 				}
@@ -131,6 +156,11 @@ void VideoIOHandler::GrabFramesInThread()
 						std::cout << "Frame " << i << " gone missing, can't grab" << std::endl;
 					}
 				}
+			}
+
+			if (grabsingleframe){ //just a single run through was requested
+				grabsingleframe = false;
+				this->pause();
 			}
 
 			if (gs.waitTime > msecs(0)){

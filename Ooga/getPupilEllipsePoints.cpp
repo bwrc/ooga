@@ -32,7 +32,6 @@ cv::Point2d* getPupilEllipsePoints(cv::RotatedRect pupilEllipse, cv::Point2d pup
     }
   }
 
-
   for (int i=0; i<4; i++)  {
     pupilEllipsePoints[i] = cv::Point2d(theta * pupilEllipsePoints_meas[i].x + (1-theta) * pupilEllipsePoints_prev[i].x, \
 					theta * pupilEllipsePoints_meas[i].y + (1-theta) * pupilEllipsePoints_prev[i].y);

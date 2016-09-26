@@ -1,10 +1,13 @@
 #include "getPupilEllipse.h"
 
-cv::RotatedRect getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_center, cv::Mat pupil_kernel, cv::Mat pupil_element) {
+//cv::RotatedRect getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_center, cv::Mat pupil_kernel, cv::Mat pupil_element) {
 
+//cv::RotatedRect getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_center, cv::Mat pupil_kernel, cv::Mat pupil_element, bool pupil_iterate, float pupil_beta)
+void getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_center, cv::Mat pupil_kernel, cv::Mat pupil_element, bool pupil_iterate, float pupil_beta, cv::RotatedRect* pupilEllipse)
+{
   using namespace std;
 
-  bool ITERATE = 1;
+  bool ITERATE = pupil_iterate;
 
   // Initialize variables
   float Svert = eyeImage_opened.rows;
@@ -97,10 +100,10 @@ cv::RotatedRect getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_cente
       pupil_contour[i].x = pupil_contour[i].x + x_min + delta_edge;
       pupil_contour[i].y = pupil_contour[i].y + y_min + delta_edge;
     }
-    cv::RotatedRect pupilEllipse = cv::fitEllipse(pupil_contour);
+    //cv::RotatedRect pupilEllipse = cv::fitEllipse(pupil_contour);
+	(*pupilEllipse) = cv::fitEllipse(pupil_contour);
 
-
-    return pupilEllipse;
+//    return pupilEllipse;
   }
   
 
@@ -132,7 +135,7 @@ cv::RotatedRect getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_cente
   cv::normalize(imFilt_left, imFilt_left, 0, 1, cv::NORM_MINMAX, -1);
   cv::normalize(imFilt_right, imFilt_right, 0, 1, cv::NORM_MINMAX, -1);
 
-  float beta = 20;
+  float beta = pupil_beta;// 20;
   int n = 1;
   int post_val_prev = 0;
   double postDiff_thold = 0;
@@ -248,23 +251,12 @@ cv::RotatedRect getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_cente
    
   }  // end of while(1)
 
-  
-  if (0) {  // PLOT
-    for (int i=0; i<pupil_edge.size(); i++) {
-      circle(eyeImage_clone,  pupil_edge[i], 2, 150, -1, 8);
-      imshow("Lopullinen kuva", eyeImage_clone);
-    }
-    cv::waitKey(1);
-  }
-
-
-
   ellipse = cv::fitEllipse(pupil_edge);  
   ellipse.center.x = ellipse.center.x + x_min;
   ellipse.center.y = ellipse.center.y + y_min;
   ellipse.angle = (270-ellipse.angle) *CV_PI/180;
 
-
-  return ellipse;
+  (*pupilEllipse) = ellipse;
+//  return ellipse; 
 
 }

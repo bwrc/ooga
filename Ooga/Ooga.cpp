@@ -63,14 +63,18 @@
 
 	/* SET UP queues, threads, etc.  =======================================================================*/
 	//initialize queues
-	concurrent_queue<std::shared_ptr<TBinocularFrame>> *processQueue;
-	processQueue = new concurrent_queue<std::shared_ptr<TBinocularFrame>>;
+//	concurrent_queue<std::shared_ptr<TBinocularFrame>> *processQueue;
+//	processQueue = new concurrent_queue<std::shared_ptr<TBinocularFrame>>;
+	BalancingQueue<std::shared_ptr<TBinocularFrame>> *processQueue;
+	processQueue = new BalancingQueue<std::shared_ptr<TBinocularFrame>>;
 
-	concurrent_queue<std::shared_ptr<TBinocularFrame>> *visualizationQueue;
-	visualizationQueue = new concurrent_queue<std::shared_ptr<TBinocularFrame>>;
+//	concurrent_queue<std::shared_ptr<TBinocularFrame>> *visualizationQueue;
+//	visualizationQueue = new concurrent_queue<std::shared_ptr<TBinocularFrame>>;
+	BalancingQueue<std::shared_ptr<TBinocularFrame>> *visualizationQueue;
+	visualizationQueue = new BalancingQueue<std::shared_ptr<TBinocularFrame>>;
 
 	//rate limiter
-	FrameRateLimiter* limiter = new FrameRateLimiter();
+//	FrameRateLimiter* limiter = new FrameRateLimiter(); <- included in the queues
 
 	//setup video handler
 	VideoIOHandler* grabber = new VideoIOHandler(processQueue, std::string("..\\videos\\test"));
@@ -86,12 +90,28 @@
 		//		cams[i]->open("../videos/video" + std::to_string(i) + ".avi");
 		if (!cams[i]->open("../videos/cam" + std::to_string(i + 1) + ".mjpg")) {
 			std::cout << "Could not open video file" << std::endl;
+			break;
 		}
 
 		cams[i]->set(cv::CAP_PROP_FRAME_WIDTH, 640);
 		cams[i]->set(cv::CAP_PROP_FRAME_HEIGHT, 480);
 
-		grabber->AddCamera(FrameSrc(i), cams[i]);
+		//TODO: fuckety-foo - all of a sudden the compiler IN RELEASE MODE optimizes this out, probably due to 
+		//the enum(i) -> which might be undefined (while it shouldn't)
+		int ret = grabber->AddCamera(FrameSrc(i), cams[i]);
+		std::cout << ret;
+/*		switch (i){
+		case 0:
+			grabber->AddCamera(FrameSrc::SCENE, cams.at(i));// [i]);
+			break;
+		case 1:
+			grabber->AddCamera(FrameSrc::EYE_L, cams[i]);
+			break;
+		case 2:
+			grabber->AddCamera(FrameSrc::EYE_R, cams[i]);
+			break;
+		}
+*/
 		// (int)FrameSrc(i)]); 
 		// TODO addcamera doesn't use the frame identifier, just pushes them in order called, how should this work to get the right feed to the right tracker?
 	}
@@ -100,9 +120,9 @@
 	std::string wn0 = "cam0";
 	std::string wn1 = "cam1";
 	std::string wn2 = "cam2";
-	cv::namedWindow(wn0, cv::WINDOW_OPENGL);
-	cv::namedWindow(wn1, cv::WINDOW_OPENGL);
-	cv::namedWindow(wn2, cv::WINDOW_OPENGL);
+	cv::namedWindow(wn0, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
+	cv::namedWindow(wn1, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
+	cv::namedWindow(wn2, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
 	cv::moveWindow(wn2, 10, 500);
 	cv::moveWindow(wn1, 650, 500);
 	cv::moveWindow(wn0, 330, 50);
@@ -152,6 +172,8 @@
 			case 32: //SPACE
 				grabber->pause(); //toggle
 				break;
+			case 110: //n
+				grabber->grabone();
 				/*			case 49: //1
 				grabber->setFrameDurationTest(--framedur);
 				break;
@@ -177,7 +199,7 @@
 
 	delete grabber;
 
-	delete limiter;
+	//delete limiter;
 
 	return 0;
 }

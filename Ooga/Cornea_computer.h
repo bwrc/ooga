@@ -69,7 +69,7 @@ extern "C" FILE* __cdecl __iob_func()
 #include <vector>
 
 
-namespace gt {
+namespace ooga {
 
     class DATA_FOR_CORNEA_COMPUTATION {
 
