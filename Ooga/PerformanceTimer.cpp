@@ -35,9 +35,9 @@ std::vector<timestampvalue> TPerformanceTimer::getTimeStamps()
 void TPerformanceTimer::dumpTimeStamps(std::ostream& dumpto, bool clear )
 {
 	for (auto& item : timeStamps) {
-		dumpto << std::get<0>(item)
+		dumpto << item.first //std::get<0>(item)
 		<< " - "
-		<< std::get<1>(item).c_str()
+		<< item.second.c_str() //std::get<1>(item).c_str()
 		<< std::endl;
 	}
 	if( clear )	timeStamps.clear();
@@ -48,4 +48,3 @@ void TPerformanceTimer::clearTimeStamps()
 {
 	timeStamps.clear();
 }
-

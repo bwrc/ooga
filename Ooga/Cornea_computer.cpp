@@ -77,7 +77,7 @@ namespace ooga {
 	    // std::cout << "cur_data.alpha_aux: " << cur_data.alpha_aux << std::endl;
 	    // std::cout << "cur_data.l_aux: " << cur_data.l_aux << std::endl;
 
-	    
+
 	    //std::cout << "g_aux: "  << g_aux_n(0) << "  " << g_aux_n(1) << "  " << g_aux_n(2) << std::endl;
 
         }
@@ -131,6 +131,10 @@ namespace ooga {
         // initialise the cornea tracker
         create(led_pos, glint_pos);
 
+        #ifndef GSL_MULTIFIT_FDFSOLVER_J
+        gsl_matrix *J = NULL;
+        #endif
+
         /*
          * Check out usage and more info about GSL:
          * http://www.csse.uwa.edu.au/programming/gsl-1.0/gsl-ref_35.html
@@ -177,7 +181,16 @@ namespace ooga {
 
 
         gsl_matrix *covar = gsl_matrix_alloc(p, p);
+        #ifdef GSL_MULTIFIT_FDFSOLVER_J // J was deprecated at some version?
         gsl_multifit_covar(solver->J, 0.0, covar);
+        #else
+
+        J = gsl_matrix_alloc(n, p); //should be (n,p), but what is n?
+        gsl_multifit_fdfsolver_jac(solver, J);
+        gsl_multifit_covar(J, 0.0, covar);
+
+        gsl_matrix_free(J);
+        #endif
 
         // for(int row = 0; row < p; ++row) {
         //     for(int col = 0; col < p; ++col) {
@@ -368,7 +381,7 @@ namespace ooga {
                 const double rx1 = data1.R(i, 2);
 
                 // d/dgxi B(gxi)
-                const double dB = 
+                const double dB =
                     rx1 * tan_a1 + rx1 * RHO * sin((data1.alpha_aux - atan_res1) / 2.) *
                     (tan_a1 * (1.0 / (data1.l_aux - gx_guess1)) +
                      (1.0 / POW2(data1.l_aux - gx_guess1)) * gx_guess1 * tan_a1) / (2. * (1. + POW2(a1)));
@@ -478,4 +491,3 @@ namespace ooga {
 
 
 }    // end of "namespace ooga"
-

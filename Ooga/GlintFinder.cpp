@@ -15,7 +15,7 @@ static bool DO_PERF_T = false;
 
 
 cv::Mat log_mvnpdf(cv::Mat x, cv::Mat mu, cv::Mat C) {
-	// Computes the logarithm of multivariate normal probability density function (mvnpdf) of x with 
+	// Computes the logarithm of multivariate normal probability density function (mvnpdf) of x with
 	// mean mu, covariance C, and log'd normalization factor log_norm_factor, using Cholesky decomposition.
 	// The matrix sizes must be [D x N] where D is the dimension and N is the number of points in which to evalute this function.
 	// Give the arguments as CV_32F.
@@ -144,12 +144,12 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff,
 	cv::Mat mu_cond(2, 1, CV_32F);
 	cv::Mat mu_dyn(2, 1, CV_32F);
 	cv::Mat mu_dum(2, 1, CV_32F);
-	cv::Mat C_cond; 
+	cv::Mat C_cond;
 	cv::Mat C_dyn = cv::Mat::eye(2, 2, CV_32F)*theta * 100; // (loppukerroin oli 100)
 	cv::Mat invC_dyn(2, 2, CV_32F);
-	if (cv::invert(C_dyn, invC_dyn, cv::DECOMP_CHOLESKY) == 0) { 
-		printf("getGlints.cpp: C_dynamical could not be inverted with theta = %.100f \n", theta);  
-		exit(-1); 
+	if (cv::invert(C_dyn, invC_dyn, cv::DECOMP_CHOLESKY) == 0) {
+		printf("getGlints.cpp: C_dynamical could not be inverted with theta = %.100f \n", theta);
+		exit(-1);
 	}
 	int x_min;
 	int x_max;
@@ -203,13 +203,13 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff,
 		cv::UMat paintover = eyeImage_cropped
 			.colRange(x0, x1).rowRange(y0, y1);
 
-		//eyeImage_cropped(cv::Range( std::max(float(0), float(max_loc.y - delta_glint)), 
+		//eyeImage_cropped(cv::Range( std::max(float(0), float(max_loc.y - delta_glint)),
 		//							std::min(Svert_crop, float(max_loc.y + delta_glint))), \
-		//							cv::Range(std::max(float(0), float(max_loc.x - delta_glint)), 
+		//							cv::Range(std::max(float(0), float(max_loc.x - delta_glint)),
 		//							std::min(Shori_crop, float(max_loc.x + delta_glint)))) = \
-		//	eyeImage_cropped(cv::Range(std::max(float(0), float(max_loc.y - delta_glint)), 
+		//	eyeImage_cropped(cv::Range(std::max(float(0), float(max_loc.y - delta_glint)),
 		//					 std::min(Svert_crop, float(max_loc.y + delta_glint))), \
-		//					 cv::Range(std::max(float(0), float(max_loc.x - delta_glint)), 
+		//					 cv::Range(std::max(float(0), float(max_loc.x - delta_glint)),
 		//						 std::min(Shori_crop, float(max_loc.x + delta_glint)))) * 0;
 		paintover.setTo(0);
 
@@ -275,10 +275,10 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff,
 				float *glints_y_sofar = makeDynArray<float>(k);
 				float *MU_X_sofar = makeDynArray<float>(k);
 				float *MU_Y_sofar = makeDynArray<float>(k);
-				//float glints_x_sofar[k], 
-				//	glints_y_sofar[k],  
-				//	MU_X_sofar[k],  
-				//	MU_Y_sofar[k], 
+				//float glints_x_sofar[k],
+				//	glints_y_sofar[k],
+				//	MU_X_sofar[k],
+				//	MU_Y_sofar[k],
 				float	glints_x_sofar_mean = 0, glints_y_sofar_mean = 0, MU_X_sofar_mean = 0, MU_Y_sofar_mean = 0;
 				for (int i = 0; i<k; i++) {
 					glints_x_sofar[i] = glints_x[p][ORDERS[j][i]];
@@ -465,7 +465,7 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff,
 				if(DO_PERF_T) pt->addTimeStamp("logmvnpdf");
 
 				//this breaks after running a while because log_prior is empty (0x0 matrix)
-				bool bad = isnan(log_prior.at<float>(0, 0)) || isnan(log_prior.at<float>(0, 1)) || isnan(log_prior.at<float>(1, 0)) || isnan(log_prior.at<float>(1, 1));
+				bool bad = std::isnan(log_prior.at<float>(0, 0)) || std::isnan(log_prior.at<float>(0, 1)) || std::isnan(log_prior.at<float>(1, 0)) || std::isnan(log_prior.at<float>(1, 1));
 				if (bad) {
 					log_prior = log_lhood * 0;
 				}

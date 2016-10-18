@@ -4,8 +4,8 @@
 
 const double PI = 3.1415926535898;
 
-#include <opencv2\core.hpp>
-#include <opencv2\imgproc.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #include <vector>
 
 #include "PerformanceTimer.h"

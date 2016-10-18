@@ -1,7 +1,7 @@
 /*
-// This file is part of the ÖÖGA - Open-source Gazetracker Application
+// This file is part of the ï¿½ï¿½GA - Open-source Gazetracker Application
 // Copyright 2016
-// Kristian Lukander <kristian.lukander@ttl.fi>, 
+// Kristian Lukander <kristian.lukander@ttl.fi>,
 // Miika Toivanen <miika.toivanen@ttl.fi>
 // Finnish Institute of Occupational Health, Helsinki, Finland
 //
@@ -41,7 +41,7 @@
 #endif
 {
 	/* SET PROGRAM OPTIONS, PATHS ETC.======================================================================*/
-	
+
 	// TODO these should be configurable without compiling -> read settings first
 	//disable OpenCL to avoid the stutters
 	putenv("OPENCV_OPENCL_RUNTIME=qqq");
@@ -76,11 +76,15 @@
 	//rate limiter
 //	FrameRateLimiter* limiter = new FrameRateLimiter(); <- included in the queues
 
+std::cout << "BEFORE VIDEOIO" << std::endl;
+
 	//setup video handler
-	VideoIOHandler* grabber = new VideoIOHandler(processQueue, std::string("..\\videos\\test"));
+	VideoIOHandler* grabber = new VideoIOHandler(processQueue, std::string("../videos/test"));
 	grabber->setSaveState(true);
+	std::cout << "VIDEOIO OK" << std::endl;
 
 	FrameProcessor* processor = new FrameProcessor(processQueue, visualizationQueue);
+	std::cout << "PROCESSOR CREATED" << std::endl;
 
 	//setup cameras
 	//TODO this only opens a set of video files for testing, replace with configged opening of cameras!
@@ -96,7 +100,7 @@
 		cams[i]->set(cv::CAP_PROP_FRAME_WIDTH, 640);
 		cams[i]->set(cv::CAP_PROP_FRAME_HEIGHT, 480);
 
-		//TODO: fuckety-foo - all of a sudden the compiler IN RELEASE MODE optimizes this out, probably due to 
+		//TODO: fuckety-foo - all of a sudden the compiler IN RELEASE MODE optimizes this out, probably due to
 		//the enum(i) -> which might be undefined (while it shouldn't)
 		int ret = grabber->AddCamera(FrameSrc(i), cams[i]);
 		std::cout << ret;
@@ -112,9 +116,10 @@
 			break;
 		}
 */
-		// (int)FrameSrc(i)]); 
+		// (int)FrameSrc(i)]);
 		// TODO addcamera doesn't use the frame identifier, just pushes them in order called, how should this work to get the right feed to the right tracker?
 	}
+	std::cout << "AFTER CAM ADD" << std::endl;
 
 	//setup cv windows
 	std::string wn0 = "cam0";
@@ -203,4 +208,3 @@
 
 	return 0;
 }
-

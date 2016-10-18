@@ -15,7 +15,7 @@
 #include "SG_common.h"
 #include <chrono>
 
-#include "..\utils\concurrent_queue.h"
+#include "../utils/concurrent_queue.h"
 #include "EyeTracker.h"
 
 

@@ -45,8 +45,8 @@ public:
 
 	//threaded version
 	void setSaveState(bool state);
-	//non-threaded videowrite: 
-	//void setSaveState(bool state, std::string eyeFileName, std::string sceneFileName); 
+	//non-threaded videowrite:
+	//void setSaveState(bool state, std::string eyeFileName, std::string sceneFileName);
 
 	//void pauseGrabber();// bool shouldPause);
 	void start();
@@ -62,7 +62,8 @@ private:
 
 	//boost::thread m_thread;
 	std::thread m_thread;
-	std::atomic<bool> keepRunning = true;
+	//std::atomic<bool> 
+	bool keepRunning = true;
 
 	std::string recName = "";
 
@@ -71,7 +72,7 @@ private:
 //	concurrent_queue<std::shared_ptr<TBinocularFrame>>* procRWQ;
 	BalancingQueue<std::shared_ptr<TBinocularFrame>>* procRWQ;
 
-	std::vector<cv::VideoCapture *> caps;				// pointers to video capture devices 
+	std::vector<cv::VideoCapture *> caps;				// pointers to video capture devices
 
 	int64 totalGrabbed;
 	//boost::posix_time::ptime zerotime;

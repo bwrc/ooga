@@ -47,13 +47,13 @@ bool TSettings::processCommandLine(int argc, char** argv)
 		}
 
 		if (vm.count("config")){
-			configFile = ROOTPATH.string() + "\\" + vm["config"].as< std::string >();
+			configFile = ROOTPATH.string() + "/" + vm["config"].as< std::string >();
 			//configFile = rootpath + vm["config"].as< std::string >();
 			std::cout << "Using config file " << configFile << std::endl;
 		}
 		else {
 #ifdef _WIN32
-			configFile = ROOTPATH.string() + "\\config\\" + std::string(DEFAULT_CONFIG_FILE);
+			configFile = ROOTPATH.string() + "/config/" + std::string(DEFAULT_CONFIG_FILE);
 			//configFile = rootpath + "\\config\\" + std::string(DEFAULT_CONFIG_FILE);
 #else
 			configFile = ROOTPATH.string() + "/config/" + std::string(DEFAULT_CONFIG_FILE);
@@ -63,7 +63,7 @@ bool TSettings::processCommandLine(int argc, char** argv)
 
 		if (vm.count("eyefileL")){
 			// command line <- --eyefile videos\eyeshot.mp4
-			eyeVidLeftFile = ROOTPATH.string() + "\\" + vm["eyefileL"].as< std::string >();
+			eyeVidLeftFile = ROOTPATH.string() + "/" + vm["eyefileL"].as< std::string >();
 			//eyeVidLeftFile = rootpath + vm["eyefileL"].as< std::string >();
 
 			//check if file exists here?
@@ -71,14 +71,14 @@ bool TSettings::processCommandLine(int argc, char** argv)
 
 		if (vm.count("eyefileR")){
 			// command line <- --eyefile videos\eyeshot.mp4
-			eyeVidRightFile = ROOTPATH.string() + "\\" + vm["eyefileR"].as< std::string >();
+			eyeVidRightFile = ROOTPATH.string() + "/" + vm["eyefileR"].as< std::string >();
 			//eyeVidRightFile = rootpath + vm["eyefileR"].as< std::string >();
 
 			//check if file exists here?
 		}
 
 		if (vm.count("scenefile")){
-			sceneVidFile = ROOTPATH.string() + "\\" + vm["scenefile"].as< std::string >();
+			sceneVidFile = ROOTPATH.string() + "/" + vm["scenefile"].as< std::string >();
 			//sceneVidFile = rootpath + "\\" + vm["scenefile"].as< std::string >();
 			//if (fileExists(sceneVidFile)){
 			//	std::cout << "Using " << sceneVidFile << " for scene video" << std::endl;

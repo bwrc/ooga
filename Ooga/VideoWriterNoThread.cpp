@@ -1,5 +1,5 @@
 #include "VideoWriterNoThread.h"
-#include <opencv2\highgui\highgui.hpp>
+//#include <opencv2/highgui/highgui.hpp>
 VideoWriterNoThread::VideoWriterNoThread(std::string recordingName, int fps)
 {
 	this->fps = fps;
@@ -53,7 +53,8 @@ bool VideoWriterNoThread::setupVideoFile(FrameSrc src, std::string fn)
 	case FrameSrc::EYE_L:
 		eyeLeftWriter = new cv::VideoWriter(
 			fn,
-			CV_FOURCC('D', 'I', 'V', 'X'),
+//			CV_FOURCC('D', 'I', 'V', 'X'),
+			CV_FOURCC('M', 'J', 'P', 'G'),
 			fps,
 			cv::Size(width, height),
 			true); //should be false for bw?
@@ -65,10 +66,11 @@ bool VideoWriterNoThread::setupVideoFile(FrameSrc src, std::string fn)
 	case FrameSrc::EYE_R:
 		eyeRightWriter = new cv::VideoWriter(
 			fn,
-			CV_FOURCC('D', 'I', 'V', 'X'),
+			//			CV_FOURCC('D', 'I', 'V', 'X'),
+						CV_FOURCC('M', 'J', 'P', 'G'),
 			fps,
 			cv::Size(width, height),
-			true); 
+			true);
 
 		if (!eyeRightWriter->isOpened()){
 			retval = false;
@@ -77,10 +79,11 @@ bool VideoWriterNoThread::setupVideoFile(FrameSrc src, std::string fn)
 	case FrameSrc::SCENE:
 		sceneWriter = new cv::VideoWriter(
 			fn,
-			CV_FOURCC('D', 'I', 'V', 'X'),
+			//			CV_FOURCC('D', 'I', 'V', 'X'),
+						CV_FOURCC('M', 'J', 'P', 'G'),
 			fps,
 			cv::Size(width, height),
-			true); 
+			true);
 
 		if (!sceneWriter->isOpened()){
 			retval = false;
@@ -147,4 +150,3 @@ void VideoWriterNoThread::write()
 		frameUpdated = false;
 	}
 }
-

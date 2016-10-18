@@ -25,7 +25,7 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 	std::string glintmodel_fn = "../calibration/glint_model.yaml";
 	std::string K9_matrix_fn = "../calibration/K9.yaml";
 
-	etLeft->InitAndConfigure( FrameSrc::EYE_L, CM_fn_left, glintmodel_fn, K9_matrix_fn ); 
+	etLeft->InitAndConfigure( FrameSrc::EYE_L, CM_fn_left, glintmodel_fn, K9_matrix_fn );
 	etRight->InitAndConfigure(FrameSrc::EYE_R, CM_fn_right, glintmodel_fn, K9_matrix_fn );
 
 	cv::FileStorage fs(K9_matrix_fn, cv::FileStorage::READ);
@@ -170,12 +170,13 @@ void FrameProcessor::Process()
 				TTrackingResult* resR = new TTrackingResult;
 
 				//runs left in it's own thread and right here
-				std::thread thr_eL = std::thread(&EyeTracker::Process, etLeft, frame->getImg(FrameSrc::EYE_L), resL, pupilCenter3DL, corneaCenter3DL);
+				//std::thread thr_eL = std::thread(&EyeTracker::Process, etLeft, frame->getImg(FrameSrc::EYE_L), resL, pupilCenter3DL, corneaCenter3DL);
+				std::thread thr_eL = std::thread(&EyeTracker::Process, etLeft, frame->getImg(FrameSrc::EYE_L), std::ref(resL), std::ref(pupilCenter3DL), std::ref(corneaCenter3DL));
 				//etLeft->Process(frame->getImg(FrameSrc::EYE_L), resL, pupilCenter3DL, corneaCenter3DL);
 
 				//std::thread thr_eR = std::thread(&EyeTracker::Process, etRight, frame->getImg(FrameSrc::EYE_R), resR, pupilCenter3DL, corneaCenter3DL);
 				etRight->Process(frame->getImg(FrameSrc::EYE_R), resR, pupilCenter3DR, corneaCenter3DR);
-				
+
 				thr_eL.join();
 				//thr_eR.join();
 
@@ -247,7 +248,7 @@ void FrameProcessor::Process()
 				// Check if features of both eyes are ok; otherwise, use only "better" eye or don't use either
 				bool using_both_eyes = 1;
 				cv::Point3d gazePoint_ecam;
-				int best_eye_ind = 0; //0 = right, 1 = left 
+				int best_eye_ind = 0; //0 = right, 1 = left
 				double best_score = resL->score;
 				if (abs(resR->score - resL->score) > 0.2) {
 					using_both_eyes = 0;
@@ -323,11 +324,11 @@ void FrameProcessor::Process()
 					double gaze_dist_left = 0.5*norm(cr - cl) / sin(0.5*acos(gl.dot(gr)));
 					double gaze_dist_right = gaze_dist_left;
 
-					//KL TÄÄ TOIMII VAAN SILLÄ OLETUKSELLA ETTÄ KATSE ON SILMIEN PUOLIVÄLISSÄ? VARMASTI RAUHOITTAA TULOSTA, MUTTA EI SE OIKEIN OLE?!
+					//KL Tï¿½ï¿½ TOIMII VAAN SILLï¿½ OLETUKSELLA ETTï¿½ KATSE ON SILMIEN PUOLIVï¿½LISSï¿½? VARMASTI RAUHOITTAA TULOSTA, MUTTA EI SE OIKEIN OLE?!
 					//TODO: this is now in right eye coordinates, right? -> use of A_r2s below
 					gazePoint_ecam = (cv::Point3d(cl + gaze_dist_left*gl) + cv::Point3d(cr + gaze_dist_right*gr)) / 2;  // The computed gaze point is in the right (user's right) eye cam coordinates
 				}
-				
+
 				double pog_x, pog_y;
 
 //				if (!USE_REALSENSE) { TODO: for now, we don't include this
@@ -366,7 +367,7 @@ void FrameProcessor::Process()
 
 				bool USE_KALMAN = true;
 
-				//TODO: ADD KALMAN 
+				//TODO: ADD KALMAN
 				/*
 				if (USE_KALMAN) {
 					if (PLOT == 2) { circle(sceneImage, pog_scam, 12, Scalar(250, 250, 0), -1, 8); }  // The un-filtered point
@@ -489,6 +490,5 @@ void FrameProcessor::Process()
 		}
 
 	}
-	
-}
 
+}

@@ -23,7 +23,7 @@ private:
 	//std::queue<Data, Eigen::aligned_allocator<Data>> myQueue;
 	mutable boost::mutex myMutex;
 	boost::condition_variable myCondVar;
-	
+
 public:
 
 	int getQueueLength()
@@ -163,7 +163,7 @@ template<typename Data>
 bool BalancingQueue<Data>::try_push(Data data)
 {
 	if (this->getToken()){
-		push(data);
+		this->push(data);
 		return true;
 	}
 	else {
