@@ -131,8 +131,9 @@ namespace ooga {
         // initialise the cornea tracker
         create(led_pos, glint_pos);
 
-        #ifndef GSL_MULTIFIT_FDFSOLVER_J
-        gsl_matrix *J = NULL;
+        //#ifndef GSL_MULTIFIT_FDFSOLVER_J
+		#if !defined(GSL_MULTIFIT_FDFSOLVER_J) && !defined(WIN32)
+		    gsl_matrix *J = NULL;
         #endif
 
         /*
@@ -181,16 +182,17 @@ namespace ooga {
 
 
         gsl_matrix *covar = gsl_matrix_alloc(p, p);
-        #ifdef GSL_MULTIFIT_FDFSOLVER_J // J was deprecated at some version?
+        //#ifdef GSL_MULTIFIT_FDFSOLVER_J // J was deprecated at some version?
+	#if defined(GSL_MULTIFIT_FDFSOLVER_J) || defined(WIN32) //this is strange, but probably has to do with the version of GSL precompiled for VS2013?
         gsl_multifit_covar(solver->J, 0.0, covar);
-        #else
+    #else
 
         J = gsl_matrix_alloc(n, p); //should be (n,p), but what is n?
         gsl_multifit_fdfsolver_jac(solver, J);
         gsl_multifit_covar(J, 0.0, covar);
 
         gsl_matrix_free(J);
-        #endif
+    #endif
 
         // for(int row = 0; row < p; ++row) {
         //     for(int col = 0; col < p; ++col) {
