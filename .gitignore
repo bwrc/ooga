@@ -3,11 +3,18 @@
 # Template from https://www.gitignore.io/api/visualstudio,linux
 
 # ÖÖGA specific
+#the executable
+ooga
+
 # skip (huge) video files
 [Vv]ideos/
+*.avi
 
 ### Linux ###
 *~
+
+# g++
+*.o
 
 # temporary files which can be created if a process still has a handle open of a deleted file
 .fuse_hidden*

@@ -368,6 +368,7 @@ void FrameProcessor::Process()
 				bool USE_KALMAN = true;
 
 				//TODO: ADD KALMAN
+				//note, return sigmoid values from eye trackers
 				/*
 				if (USE_KALMAN) {
 					if (PLOT == 2) { circle(sceneImage, pog_scam, 12, Scalar(250, 250, 0), -1, 8); }  // The un-filtered point

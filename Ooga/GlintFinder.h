@@ -40,11 +40,31 @@ public:
 	//	std::vector<cv::Point2d> glintPoints_prev,
 	//	float theta, float MU_X[], float MU_Y[], cv::Mat CM, cv::Mat glint_kernel,
 	//	double &score, float loglhoods[], float glint_beta, float glint_reg_coef);
-	std::vector<cv::Point2d> getGlints(cv::UMat eyeImage_diff,
+	std::vector<cv::Point2d> getGlints_old_not_scale_invariant(cv::UMat eyeImage_diff,
 		cv::Point2d pupil_center,
 		std::vector<cv::Point2d> glintPoints_prev,
 		float theta, cv::Mat glint_kernel,
 		double &score, float loglhoods[], float glint_beta, float glint_reg_coef);
+
+/*	std::vector<cv::Point2d> getGlints(cv::UMat eyeImage_diff,
+		cv::Point2d pupil_center,
+		std::vector<cv::Point2d> glintPoints_prev,
+		float theta,
+		cv::Mat glint_kernel,
+		double *score, float loglhoods[6], float glint_beta, float glint_reg_coef, float *scale, int N_glint_candidates, bool bUpdateGlintModel);
+*/
+		std::vector<cv::Point2d> getGlints(cv::UMat eyeImage_diff, cv::Point2d pupil_center, std::vector<cv::Point2d> glintPoints_prev, float theta,
+			cv::Mat glint_kernel, double &score, float loglhoods[], float glint_beta, float glint_reg_coef,
+			const int N_glint_candidates,
+		  bool bUpdateGlintModel );
+
+		void updateGlintModel(
+			std::vector<cv::Point2d> glintPoints,
+		//	float MU_X[],
+		//	float MU_Y[],
+		//	cv::Mat &CM,
+			const double score,
+			const int N_prior_meas );
 
 private:
 	int cropminX;
@@ -58,8 +78,8 @@ private:
 	cv::UMat eyeImage_cropped;
 	cv::UMat eyeImage_aux_crop;
 
-	//load these in init
-	//these should be moved here?
+  int framecounter = 0;
+	float scale = 40.0f;
 
 	float MU_X[6], MU_Y[6];
 	cv::Mat CM;

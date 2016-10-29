@@ -30,13 +30,13 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	//TODO: read these from setting / function params
 	int cols = 640;
 	int rows = 480;
-	this->setCropWindowSize(150, 100, 350, 300);
+	this->setCropWindowSize(150, 100, 350, 400);
 	lambda_ed = -0.02;  // initial guess (was -0.03)
 	alpha_ed = 500;  // initial guess (was 300 or 200)
 	theta = -1;
 	theta_prev = -1;
 	weight = 0.7;
-	
+
 	//allocate memory for mats
 	gray = cv::UMat(rows, cols, CV_8UC1, cv::Scalar::all(0));
 	cropped = cv::UMat(cropsizeX, cropsizeY, CV_8UC1, cv::Scalar::all(0));
@@ -46,7 +46,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	sigmoid_buffer = cv::Mat::zeros(1, 5, CV_64F);
 
 	//create glint element
-	int morph_radius = 3;
+	int morph_radius = 5; //3 ->5 big enough for tophat operation
 	glint_element = getStructuringElement(cv::MORPH_RECT, cv::Size(2 * morph_radius + 1, 2 * morph_radius + 1));
 	glint_element.at<uchar>(0, 0) = 0; glint_element.at<uchar>(0, 1) = 0; glint_element.at<uchar>(1, 0) = 0;
 	glint_element.at<uchar>(glint_element.rows - 2, 0) = 0; glint_element.at<uchar>(glint_element.rows - 1, 0) = 0; glint_element.at<uchar>(glint_element.rows - 1, 1) = 0;
@@ -114,8 +114,8 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 
 	float scale = 1.0;  // NOTE!!
 	for (int i = 0; i<N_leds; i++) {
-		MU_X[i] = MU_X[i] * scale; 
-		MU_Y[i] = MU_Y[i] * scale; 
+		MU_X[i] = MU_X[i] * scale;
+		MU_Y[i] = MU_Y[i] * scale;
 	}
 
 	cv::FileStorage fs("calibration/parameters.yaml", cv::FileStorage::READ);
@@ -128,16 +128,17 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	// LOAD CM
 	cv::Mat CM(N_leds * 2, N_leds * 2, CV_32F);
 
-	//// Read the covariance matrises (CM) from files
+	//// Read the covariance matrices (CM) from files
+	//TODO move this to a .yaml file
 	FILE *file_CM = fopen(CM_fn.c_str(), "r");
 	if (file_CM == 0) {
 		printf("Covariance file not found \n");
 		exit(-1);
 	}
-	fseek(file_CM, 0, SEEK_END); 
+	fseek(file_CM, 0, SEEK_END);
 	long lSize = ftell(file_CM); rewind(file_CM);
 	char *buffer_CM = (char*)malloc(sizeof(char)*lSize);   // allocate memory to contain the whole file
-	if (lSize<N_leds*N_leds * 4) { printf("Not a full N_leds² x N_leds² covariance matrix \n"); exit(-1); }
+	if (lSize<N_leds*N_leds * 4) { printf("Not a full 2xN_leds x 2xN_leds  covariance matrix \n"); exit(-1); }
 	if (buffer_CM == NULL) { fputs("Memory error", stderr); exit(2); }
 	fread(buffer_CM, 1, lSize, file_CM);   // read the number
 	fclose(file_CM);
@@ -161,10 +162,10 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	if (myEye == FrameSrc::EYE_L) k9fs["K9_left"] >> K9_matrix;
 	else k9fs["K9_right"] >> K9_matrix;
 
-	///////// END LOADING 
+	///////// END LOADING
 
 	//TODO: Make this make sense
-	//read these from file, select eye for camera
+	//TODO: read these from file, select eye for camera
 
 	eyeCam = new Camera();
 
@@ -181,7 +182,6 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 		eyeCam->setDistortion(eye_dist);
 	}
 
-	
 	// Calibration related stuff
 	//not used?
 	//A_rot = (cv::Mat_<float>(3, 3) << A(0, 0), A(0, 1), A(0, 2), A(1, 0), A(1, 1), A(1, 2), A(2, 0), A(2, 1), A(2, 2));
@@ -190,6 +190,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	//cv::invert(A_rot, invA_rot, cv::DECOMP_LU);
 
 	glintfinder = new GlintFinder();
+	//TODO: remove hardcoded values like the six here
 	glintfinder->Initialize( CM, MU_X, MU_Y, 6 );
 
 	//reset prev for first round
@@ -243,9 +244,10 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 	//TODO: just do this for the cropped part?
 	cv::cvtColor((*eyeframe), gray, cv::COLOR_BGR2GRAY);
 
-	std::cerr << eyeframe->getMat(cv::ACCESS_READ).size() << std::endl;
+/*	std::cerr << eyeframe->getMat(cv::ACCESS_READ).size() << std::endl;
 	std::cerr << "pix1: " << int(eyeframe->getMat(cv::ACCESS_READ).at<uchar>(199, 123)) << std::endl;
 	std::cerr << "pix2: " << int(eyeframe->getMat(cv::ACCESS_READ).at<uchar>(198, 124)) << std::endl;
+*/
 
 	pt->addTimeStamp("converted");
 
@@ -265,7 +267,7 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 
 	//// Compute the fixation parameter 'theta' (theta=0 --> fixation / theta=1 --> saccade or blink)
 
-	// Get the eye image difference and 'sigmoid' it (only for the right eye! 
+	// Get the eye image difference and 'sigmoid' it (only for the right eye!
 	//<- TODO: here it's for both as eyetrackers are independent)
 	cv::subtract(filtered, previous, imageDiff);
 	double eye_diff = norm(imageDiff);
@@ -298,20 +300,24 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 
 	pt->addTimeStamp("pupil center");
 
-	////TODOTODO: move CM, MU_X, MU_Y (check left and right eye!) to a glintFinder Init function
-
 	double score;
 	float glint_scores[6];
+	//TODO: move to config file
 	float glint_beta = 100.0f;  // The coefficient of the glint likelihood model
 	float glint_reg_coef = 1.0f;   // The initial regularization coefficient for the covariance matrix (if zero, might result in non-valid covariance matrix ---> crash)
 
 	std::vector<cv::Point2d> glintPoints;// (6, cv::Point2d(0, 0));
 
-	//TODO: check MU-args for eyeness (the tracker should relate to one, init function should select)
-	glintPoints = glintfinder->getGlints(diffimg, pupil_center, glintPoints_prev,
-		theta, /*MU_X, MU_Y, CM, moved to glintfinder*/ glint_kernel, score, glint_scores, glint_beta, glint_reg_coef);
+//	glintPoints = glintfinder->getGlints_old_not_scale_invariant(diffimg, pupil_center, glintPoints_prev,
+//		theta, glint_kernel, score, glint_scores, glint_beta, glint_reg_coef);
 
-	if (glintPoints.size() == 6){ //only if exactly hardcoded six are found->?
+	glintPoints = glintfinder->getGlints(diffimg,
+																			 pupil_center, glintPoints_prev, theta, glint_kernel,
+																			 score, glint_scores, glint_beta, glint_reg_coef,
+																			 6, true);
+
+//TODO: is this check necessary?
+//	if (glintPoints.size() == 6){ //only if exactly hardcoded six are found->?
 
 		glintPoints_prev = glintPoints;
 		pt->addTimeStamp("glintpoints");
@@ -385,7 +391,7 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 		}
 		Cc3d.x = eigCenter(0); Cc3d.y = eigCenter(1); Cc3d.z = eigCenter(2);
 
-		/// Compute the 3D pupil center  
+		/// Compute the 3D pupil center
 		Pc3d = computePupilCenter3d(pupilEllipsePoints3d, Cc3d);
 
 		/// Compute the pupil-corneal distance vector ("gaze vector") and correct it with K9
@@ -424,7 +430,7 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 			}
 		}
 */
-	} // if glintpoints.size() == 6
+	//} // if glintpoints.size() == 6
 
 	pt->addTimeStamp("draw");
 
