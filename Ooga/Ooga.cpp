@@ -1,5 +1,5 @@
 /*
-// This file is part of the ��GA - Open-source Gazetracker Application
+// This file is part of the OOGA - Open-source Gazetracker Application
 // Copyright 2016
 // Kristian Lukander <kristian.lukander@ttl.fi>,
 // Miika Toivanen <miika.toivanen@ttl.fi>
@@ -16,6 +16,12 @@
 
 //note: GSL apparently can't be compiled on VS2015
 //see http://stackoverflow.com/questions/30412951/unresolved-external-symbol-imp-fprintf-and-imp-iob-func-sdl2
+
+
+NOTE: For Visual Studio, must add the following for debugging properties (with proper user paths):
+command line: --config config\config.xml
+environment: C:\Dev\gsl\x86\lib;C:\Dev\opencv3\bin\install\x86\vc12\bin;C:\Dev\boost\lib;C:\Dev\tbb44_20160526oss\bin\ia32\vc14 
+(TBB optional on OpenCV)
 
 // ===========================================================================================================*/
 
