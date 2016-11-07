@@ -1,9 +1,11 @@
 # compiler flags
 CC=g++
-INC_DIRS= -I../ -I/usr/local/include/eigen3 -I/usr/local/include/
+#INC_DIRS= -I../ -I/usr/local/include/eigen3 -I/usr/local/include/
+INC_DIRS= -I../ -I/usr/local/include/ -Ieigen_dir -Iboost_dir
 #INCS=$(foreach d, $INC_DIR, -I$d)
-CFLAGS = -c -Wall -std=c++11 $(INC_DIRS)
-LDFLAGS= -L/usr/local/lib/boost/ -L/usr/local/lib/
+CFLAGS = -c -Wall -std=c++11 $(INC_DIRS) -Wfatal-errors
+#LDFLAGS= -L/usr/local/lib/boost/ -L/usr/local/lib/
+LDFLAGS= -Lboost_dir/stage/lib -L/usr/local/lib/
 SOURCES= Camera.cpp FrameRateLimiter.cpp \
 orderGlints.cpp VideoIOHandler.cpp Cornea_computer.cpp \
 PerformanceTimer.cpp VideoWriterNoThread.cpp \
