@@ -38,6 +38,8 @@ environment: C:\Dev\gsl\x86\lib;C:\Dev\opencv3\bin\install\x86\vc12\bin;C:\Dev\b
 #include "FrameRateLimiter.h"
 #include "../utils/concurrent_queue.h"
 
+#include "SG_common.h"
+
 // MAIN
 // to allow unicode on Win platforms, select main() VS-recommended formulation, else use C++ standard main() for multiplatform
 #ifdef _WIN32
@@ -125,13 +127,13 @@ int _tmain(int argc, _TCHAR* argv[])
     // (int)FrameSrc(i)]);
     // TODO addcamera doesn't use the frame identifier, just pushes them in order called, how should this work to get the right feed to the right tracker?
   }
-  std::cout << std::endl;
+
   std::cout << "AFTER CAM ADD" << std::endl;
 
   //setup cv windows
-  std::string wn0 = "cam0";
-  std::string wn1 = "cam1";
-  std::string wn2 = "cam2";
+  std::string wn0 = "cam0 | scene";
+  std::string wn1 = "cam1 | left";
+  std::string wn2 = "cam2 | right";
   cv::namedWindow(wn0, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
   cv::namedWindow(wn1, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
   cv::namedWindow(wn2, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
@@ -176,15 +178,20 @@ int _tmain(int argc, _TCHAR* argv[])
 	  myframe.reset();
 	}
 
+	//hrclock::time_point _start = hrclock::now();
+	//msecs duration = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
+	//std::cout << "FRAME DRAW: " << duration.count() << std::endl;
+
 	//TODO sync this to 30Hz -> wait for 30 - measured_processing_time
 	int key = cv::waitKey(1);
+
 	switch (key){
 	  //see http://www.expandinghead.net/keycode.html
 	case 27: //ESC
 	  stopThisNonsense = true;
 	  break;
 	case 32: //SPACE
-	  grabber->pause(); //toggle
+ 	  grabber->pause(); //toggle
 	  break;
 	case 110: //n
 	  grabber->grabone();

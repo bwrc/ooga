@@ -127,13 +127,19 @@ void VideoIOHandler::GrabFramesInThread()
 				//instead of just pushing,
 				//the balancing queue needs to block if it can't push 
 				//(so as to not skip frames, which could be ok for realtime slow processing while saving all frames?)
+/*simple				while (!(procRWQ->try_push(frame))){
+					//waiting for the push to go through (the wait should be enough)
+					std::this_thread::sleep_for(std::chrono::milliseconds(1));
+				}
+*/
 				if (!(procRWQ->try_push(frame))){
 					//sleep for the average frame processing time and then try until it gets through
 					const unsigned long timeToSleep = static_cast<unsigned long>(procRWQ->getAverageConsumerTime());
 					std::cout << "************ IO waiting for: " << timeToSleep << std::endl;
 					std::this_thread::sleep_for(std::chrono::milliseconds(timeToSleep));
 					while (!(procRWQ->try_push(frame))){
-						//waiting for the push to go through (the wait should be enough)
+						//waiting for the push to go through (the wait above should be enough)
+						std::this_thread::sleep_for(std::chrono::milliseconds(1));
 					}
 				}
 

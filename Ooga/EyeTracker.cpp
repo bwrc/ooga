@@ -30,7 +30,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	//TODO: read these from setting / function params
 	int cols = 640;
 	int rows = 480;
-	this->setCropWindowSize(150, 100, 350, 400);
+	this->setCropWindowSize(150, 100, 350, 350);
 	lambda_ed = -0.02;  // initial guess (was -0.03)
 	alpha_ed = 500;  // initial guess (was 300 or 200)
 	theta = -1;
@@ -312,9 +312,9 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 //		theta, glint_kernel, score, glint_scores, glint_beta, glint_reg_coef);
 
 	glintPoints = glintfinder->getGlints(diffimg,
-																			 pupil_center, glintPoints_prev, theta, glint_kernel,
-																			 score, glint_scores, glint_beta, glint_reg_coef,
-																			 6, true);
+										 pupil_center, glintPoints_prev, theta, glint_kernel,
+										 score, glint_scores, glint_beta, glint_reg_coef,
+										 2, true);
 
 //TODO: is this check necessary?
 //	if (glintPoints.size() == 6){ //only if exactly hardcoded six are found->?

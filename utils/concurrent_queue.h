@@ -11,7 +11,7 @@
 
 //#include <Eigen/Eigen>
 
-#define DEFAULT_TOKENS 10
+#define DEFAULT_TOKENS 100
 #define DEFAULT_REPORTED_TIMES 10
 
 template<typename Data>
