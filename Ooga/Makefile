@@ -7,7 +7,7 @@ CFLAGS = -c -Wall -std=c++11 $(INC_DIRS) -Wfatal-errors
 #LDFLAGS= -L/usr/local/lib/boost/ -L/usr/local/lib/
 LDFLAGS= -Lboost_dir/stage/lib -L/usr/local/lib/
 SOURCES= Camera.cpp FrameRateLimiter.cpp \
-orderGlints.cpp VideoIOHandler.cpp Cornea_computer.cpp \
+VideoIOHandler.cpp Cornea_computer.cpp \
 PerformanceTimer.cpp VideoWriterNoThread.cpp \
 EyeTracker.cpp \
 PupilEstimator.cpp FrameBinocular.cpp \

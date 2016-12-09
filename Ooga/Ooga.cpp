@@ -134,9 +134,9 @@ int _tmain(int argc, _TCHAR* argv[])
   std::string wn0 = "cam0 | scene";
   std::string wn1 = "cam1 | left";
   std::string wn2 = "cam2 | right";
-  cv::namedWindow(wn0, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
-  cv::namedWindow(wn1, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
-  cv::namedWindow(wn2, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
+  cv::namedWindow(wn0, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
+  cv::namedWindow(wn1, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
+  cv::namedWindow(wn2, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
   cv::moveWindow(wn2, 10, 500);
   cv::moveWindow(wn1, 650, 500);
   cv::moveWindow(wn0, 330, 50);

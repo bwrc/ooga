@@ -409,7 +409,7 @@ void FrameProcessor::Process()
 
 				*/
 
-				std::cout << "FRAME_NR: " << frame->getNumber() << std::endl;
+				//std::cout << "FRAME_NR: " << frame->getNumber() << std::endl;  // miikan poisto
 
 				cv::UMat* sceneImage = frame->getImg(FrameSrc::SCENE);
 				// Draw the pog in the scene image. Adjust its size according to the glint fit score (of the "last" camera!).
@@ -474,16 +474,23 @@ void FrameProcessor::Process()
 				qIn->reportConsumerTime(processingTime.count());
 				my_mtx.unlock();
 
+				msecs frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
+				//std::cout << frameTime.count() << std::endl;  // miikan muutos
+			
 			}
-			msecs frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
 
-			msecs waitTime = msecs(30) - frameTime;
+			msecs frameTime2 = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
+			msecs waitTime = msecs(30) - frameTime2;
 
-			std::cout << "frametime: " << frameTime.count() << std::endl;
+			std::cout << "frametime: " << frameTime2.count() << std::endl;
+
+
 
 			if (waitTime > msecs(0)){
 				std::this_thread::sleep_for(waitTime);
 			}
+
+
 
 		}
 		catch (int e) {
