@@ -86,6 +86,13 @@ private:
 	std::atomic<bool> running;
 	std::mutex pauseMutex;
 	std::condition_variable pauseChanged;
+	
+	// Kalman filter related:
+	cv::Mat param_est, P_est;
+	cv::Point2d pog_scam_prev;
+	double loc_variance;
+	double kalman_R_max; // Maximum variance for the observation noise. The larger this is, the less the observations are trusted.
+	double theta_mean; // theta_mean is averaged over L and R
 };
 
 #endif

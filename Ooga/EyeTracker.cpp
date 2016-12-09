@@ -123,7 +123,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	fs["glint_reg_coef"] >> glint_reg_coef;
 	fs["pupil_iterate"] >> pupil_iterate;
 	fs["pupil_beta"] >> pupil_beta;
-	fs["kalman_R_max"] >> kalman_R_max;
+	//fs["kalman_R_max"] >> kalman_R_max;  ( ain't used here)
 
 	// LOAD CM
 	cv::Mat CM(N_leds * 2, N_leds * 2, CV_32F);

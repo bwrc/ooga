@@ -6,6 +6,8 @@
 #include <thread>
 #include "SG_common.h"
 
+#include "kalmanFilterGazePoint.h"
+
 #define DEFAULT_GAZE_DISTANCE 1.2
 
 //FrameProcessor::FrameProcessor(concurrent_queue<std::shared_ptr<TBinocularFrame>>* in,
@@ -82,6 +84,19 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 	sceneCam->setIntrinsicMatrix(scene_intr);
 	sceneCam->setDistortion(scene_dist);
 
+
+
+	// I made it read it here (Miika)
+	//cv::FileStorage fs2("calibration/parameters.yaml", cv::FileStorage::READ);
+	fs["kalman_R_max"] >> kalman_R_max;
+
+	//param_est = cv::Mat_<double>(4, 1) << pog_scam.x, pog_scam.y, 0, 0;
+	param_est = cv::Mat::zeros(4,1, CV_64F);
+	P_est = cv::Mat::eye(4, 4, CV_64F);
+	pog_scam_prev = cv::Point2d(320,240); // TODO: This should be "pog_scam" first time!
+
+
+
 }
 
 FrameProcessor::~FrameProcessor()
@@ -148,7 +163,7 @@ void FrameProcessor::Process()
 		try{
 			blockWhilePaused();
 
-			//_start = hrclock::now();
+			_start = hrclock::now();  // if commented, compute cumulative time; else, compute time per frame
 
 			//TBinocularFrame* frame;
 			auto frame = std::shared_ptr<TBinocularFrame>(nullptr);
@@ -182,6 +197,7 @@ void FrameProcessor::Process()
 				//thr_eR.join();
 
 				//Now we have results for both eyes -> combine
+				theta_mean = (thetaL + thetaR) / 2.0;
 
 				//transform 3D features from left to right camera coordinates for combining
 				Eigen::VectorXd cc_l2r(4), Cc3d_aug(4);
@@ -198,11 +214,13 @@ void FrameProcessor::Process()
 				resL->pupilCenter3D.y = pc_l2r(1);
 				resL->pupilCenter3D.z = pc_l2r(2);
 
-				bool USE_KAPPA_CORRECTION = true;
+				bool USE_KAPPA_CORRECTION = false;  // DON'T USE "KAPPA_CORRECTION", IT WAS JUST A TEST!
 
 				cv::Point3d gazeVectorR;
 				cv::Point3d gazeVectorL;
 
+				/// TODO: DON'T USE "KAPPA_CORRECTION", IT WAS JUST A TEST
+				/// TODO: ADD USER CALIBRATION!
 				if (USE_KAPPA_CORRECTION){
 					cv::Mat x_vec = cv::Mat(cv::Point3f(resR->corneaCenter3D - resL->corneaCenter3D ));
 					cv::Mat y_vec = cv::Mat(cv::Point3f(resR->pupilCenter3D - resL->pupilCenter3D)).cross(x_vec);
@@ -368,25 +386,17 @@ void FrameProcessor::Process()
 
 				bool USE_KALMAN = true;
 
-				//TODO: ADD KALMAN
-				//note, return sigmoid values from eye trackers
-				/*
 				if (USE_KALMAN) {
-					if (PLOT == 2) { circle(sceneImage, pog_scam, 12, Scalar(250, 250, 0), -1, 8); }  // The un-filtered point
-					if (first_time) {
-						param_est = cv::Mat_<double>(4, 1) << pog_scam.x, pog_scam.y, 0, 0;
-						P_est = cv::Mat::eye(4, 4, CV_64F);
-						pog_scam_prev = pog_scam;
-					}
-					cv::Point2d velo_meas = (pog_scam - pog_scam_prev) * theta;
+					cv::Point2d velo_meas = (pog_scam - pog_scam_prev) * theta_mean;  //  (theta_mean is averaged over L and R)
 					pog_scam_prev = pog_scam;
-					kalmanFilterGazePoint(pog_scam, velo_meas, theta, &param_est, &P_est, kalman_R_max);  // theta <---> R_sigma ?
+					loc_variance = kalman_R_max * (1-theta_mean); // location observation variance
+					kalmanFilterGazePoint(pog_scam, velo_meas, &param_est, &P_est, loc_variance);  // theta <---> R_sigma ?
 
 					pog_scam.x = param_est.at<double>(0);
 					pog_scam.y = param_est.at<double>(1);
 
 				}
-				*/
+
 
 				//// ----- The actual algorithms end (apart from some calibration related computations...) -----
 
@@ -475,8 +485,8 @@ void FrameProcessor::Process()
 				qIn->reportConsumerTime(processingTime.count());
 				my_mtx.unlock();
 
-				msecs frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
-				std::cout << frameTime.count() << std::endl;  // miikan muutos
+				// msecs frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
+				// std::cout << frameTime.count() << std::endl;  // miikan muutos
 			
 			}
 
