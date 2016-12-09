@@ -14,8 +14,6 @@ PupilEstimator.cpp FrameBinocular.cpp \
 Settings.cpp FrameProcessor.cpp GlintFinder.cpp Ooga.cpp \
 computePupilCenter3d.cpp getPupilCenter.cpp getPupilEllipse.cpp getPupilEllipsePoints.cpp
 
-#getGlints.cpp
-
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=ooga
 

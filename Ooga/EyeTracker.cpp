@@ -237,7 +237,7 @@ void EyeTracker::setCropWindowSize(int xmin, int ymin, int width, int height)
 	this->cropsizeY= height;
 }
 
-void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Point3d &pupilCenter3D, cv::Point3d &corneaCenter3D)
+void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Point3d &pupilCenter3D, cv::Point3d &corneaCenter3D, double &theta)
 {
 	pt->start();
 

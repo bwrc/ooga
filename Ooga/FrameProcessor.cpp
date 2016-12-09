@@ -162,6 +162,7 @@ void FrameProcessor::Process()
 
 				cv::Point3d pupilCenter3DL, corneaCenter3DL;
 				cv::Point3d pupilCenter3DR, corneaCenter3DR;
+				double thetaL, thetaR;
 				//				cv::Mat K9_matrix = et->K9_matrix;
 //				Eigen::Matrix4d A = st->A_matrix;
 //				Camera sceneCam = st->sceneCam;
@@ -171,11 +172,11 @@ void FrameProcessor::Process()
 
 				//runs left in it's own thread and right here
 				//std::thread thr_eL = std::thread(&EyeTracker::Process, etLeft, frame->getImg(FrameSrc::EYE_L), resL, pupilCenter3DL, corneaCenter3DL);
-				std::thread thr_eL = std::thread(&EyeTracker::Process, etLeft, frame->getImg(FrameSrc::EYE_L), std::ref(resL), std::ref(pupilCenter3DL), std::ref(corneaCenter3DL));
+				std::thread thr_eL = std::thread(&EyeTracker::Process, etLeft, frame->getImg(FrameSrc::EYE_L), std::ref(resL), std::ref(pupilCenter3DL), std::ref(corneaCenter3DL), std::ref(thetaL));
 				//etLeft->Process(frame->getImg(FrameSrc::EYE_L), resL, pupilCenter3DL, corneaCenter3DL);
 
 				//std::thread thr_eR = std::thread(&EyeTracker::Process, etRight, frame->getImg(FrameSrc::EYE_R), resR, pupilCenter3DL, corneaCenter3DL);
-				etRight->Process(frame->getImg(FrameSrc::EYE_R), resR, pupilCenter3DR, corneaCenter3DR);
+				etRight->Process(frame->getImg(FrameSrc::EYE_R), resR, pupilCenter3DR, corneaCenter3DR, thetaR);
 
 				thr_eL.join();
 				//thr_eR.join();
@@ -475,14 +476,14 @@ void FrameProcessor::Process()
 				my_mtx.unlock();
 
 				msecs frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
-				//std::cout << frameTime.count() << std::endl;  // miikan muutos
+				std::cout << frameTime.count() << std::endl;  // miikan muutos
 			
 			}
 
 			msecs frameTime2 = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
 			msecs waitTime = msecs(30) - frameTime2;
 
-			std::cout << "frametime: " << frameTime2.count() << std::endl;
+			//std::cout << "frametime: " << frameTime2.count() << std::endl;
 
 
 
