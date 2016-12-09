@@ -33,7 +33,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	this->setCropWindowSize(150, 100, 350, 350);
 	lambda_ed = -0.02;  // initial guess (was -0.03)
 	alpha_ed = 500;  // initial guess (was 300 or 200)
-	theta = -1;
+	//theta = -1;
 	theta_prev = -1;
 	weight = 0.7;
 
