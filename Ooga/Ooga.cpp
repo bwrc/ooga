@@ -173,6 +173,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	  cv::imshow(wn0, *sceneImg);
 
 	  counter++;
+	  std::cout << counter << std::endl;
 
 	  //delete myframe;
 	  myframe.reset();

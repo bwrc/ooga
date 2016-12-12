@@ -122,8 +122,8 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 	int Shori = eyeImage_diff.cols;   // Image size, horizontal
 	int N_leds = 6;     // Number of leds
 	//int N_glint_candidates = 6;   // Number of glint candidates (as input argument!)
-	float delta_x = 100;  // zoom area (horizontal) around pupil center where to search the glints
-	float delta_y = 75;  // zoom area (vertical) around pupil center where to search the glints
+	float delta_x = 100;  // zoom area (horizontal) around pupil center where to search the glints (was 100)
+	float delta_y = 75;  // zoom area (vertical) around pupil center where to search the glints (was 75)
 	int delta_glint = 10;  // In searching for glint candidates, insert this amount of zero pixels around each found candidate
 	float delta_extra = 7;   // Some extra for cropping the area where the likelihood will be evaluated (was 10)
 
@@ -207,7 +207,7 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 
 	int Svert_crop = eyeImage_cropped.rows;
 	int Shori_crop = eyeImage_cropped.cols;
-	//if (0) {imshow("kuva", eyeImage_filtered_clone); waitKey(0); }
+	//if (0) {cv::imshow("kuva", eyeImage_filtered_clone); cv::waitKey(0); }
 
 	if (DO_PERF_T) pt->addTimeStamp("filters");
 
