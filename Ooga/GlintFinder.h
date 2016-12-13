@@ -55,7 +55,7 @@ public:
 */
 		std::vector<cv::Point2d> getGlints(cv::UMat eyeImage_diff, cv::Point2d pupil_center, std::vector<cv::Point2d> glintPoints_prev, float theta,
 			cv::Mat glint_kernel, double &score, float loglhoods[], float glint_beta, float glint_reg_coef,
-			const int N_glint_candidates,
+			int N_glint_candidates,
 		  bool bUpdateGlintModel );
 
 		void updateGlintModel(

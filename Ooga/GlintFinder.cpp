@@ -5,6 +5,8 @@
 #define N_LEDS 6
 #define N_GLINT_CANDIDATES 2
 
+// TODO: Give N_glint_candidates as input parameter! t: Miikax
+
 #ifdef DEBUGFILE
 
 #include <iostream>
@@ -101,8 +103,8 @@ void GlintFinder::setCropWindowSize(int xmin, int ymin, int width, int height)
 
 std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Point2d pupil_center, std::vector<cv::Point2d> glintPoints_prev, float theta,
 	cv::Mat glint_kernel, double &score, float loglhoods[], float glint_beta, float glint_reg_coef,
-	const int N_glint_candidates,
-	bool bUpdateGlintModel)
+	int N_glint_candidates, bool bUpdateGlintModel)
+
 	/*std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Point2d pupil_center, std::vector<cv::Point2d> glintPoints_prev, float theta,
 		float MU_X[], float MU_Y[], Mat CM,
 		cv::Mat glint_kernel, double &score, float loglhoods[], float glint_beta, float glint_reg_coef,
@@ -121,7 +123,9 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 	int Svert = eyeImage_diff.rows;   // Image size, vertical
 	int Shori = eyeImage_diff.cols;   // Image size, horizontal
 	int N_leds = 6;     // Number of leds
-	//int N_glint_candidates = 6;   // Number of glint candidates (as input argument!)
+
+	//N_glint_candidates = 6;   // Number of glint candidates (as input argument!)
+
 	float delta_x = 100;  // zoom area (horizontal) around pupil center where to search the glints (was 100)
 	float delta_y = 75;  // zoom area (vertical) around pupil center where to search the glints (was 75)
 	int delta_glint = 10;  // In searching for glint candidates, insert this amount of zero pixels around each found candidate
@@ -131,6 +135,8 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 	//float reg_coef = 1;    // initial regularization coefficient for the covariance matrix (if zero, might result in non-valid covariance matrix ---> crash) (an input argument nowadays)
 	float beta = glint_beta;
 	float reg_coef = glint_reg_coef;
+
+	N_glint_candidates = N_GLINT_CANDIDATES;  // todo: this should be the input argument!!
 
 	// Initialize variables
 	int N_particles = N_leds * N_glint_candidates;
@@ -167,7 +173,7 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 	cv::Mat mu_dyn(2, 1, CV_32F);
 	cv::Mat mu_dum(2, 1, CV_32F);
 	cv::Mat C_cond; //(2, 2, CV_32F);
-	cv::Mat C_dyn = cv::Mat::eye(2, 2, CV_32F)*theta * 100; // (loppukerroin oli 100)
+	cv::Mat C_dyn = cv::Mat::eye(2, 2, CV_32F)*std::abs(theta) * 100; // (loppukerroin oli 100)
 	cv::Mat invC_dyn(2, 2, CV_32F);
 	if (cv::invert(C_dyn, invC_dyn, cv::DECOMP_CHOLESKY) == 0) {
 		printf("getGlints.cpp: C_dynamical could not be inverted with theta = %.100f \n", theta);
@@ -623,6 +629,8 @@ std::vector<cv::Point2d> GlintFinder::getGlints_old_not_scale_invariant(cv::UMat
 	double &score, float loglhoods[], float glint_beta, float glint_reg_coef)
 	*/
 {
+
+  // Voiko tämän poistaa? t: Miika
 
 	assert((eyeImage_diff.size().width == cropsizeX) && (eyeImage_diff.size().height == cropsizeY));
 

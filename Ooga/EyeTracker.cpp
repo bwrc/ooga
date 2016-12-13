@@ -30,7 +30,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	//TODO: read these from setting / function params
 	int cols = 640;
 	int rows = 480;
-	this->setCropWindowSize(150, 100, 350, 350);  // todo: we can crop heavier
+	this->setCropWindowSize(150, 100, 350, 350);  // todo: we could crop heavier
 	lambda_ed = 0.02;  // initial guess
 	alpha_ed = 500;  // initial guess
 	//theta = -1;
@@ -248,6 +248,8 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 
 void EyeTracker::setCropWindowSize(int xmin, int ymin, int width, int height)
 {
+  // TODO: Ensure that the cropping doesn't exceed image size! t: Miika
+
 	this->cropminX = xmin;
 	this->cropminY = ymin;
 	this->cropsizeX = width;
@@ -257,7 +259,7 @@ void EyeTracker::setCropWindowSize(int xmin, int ymin, int width, int height)
 void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Point3d &pupilCenter3D, cv::Point3d &corneaCenter3D, double &theta)
 {
 
-  // Miksi tämä "palauttaa" &pupilCenter3D ja &corneaCenter3D, kun ne kuitenkin ovat trackres:n tietueita?
+  // Miksi tämä "palauttaa" &pupilCenter3D ja &corneaCenter3D, kun ne kuitenkin ovat trackres:n tietueita? t: Miika
 
 	pt->start();
 
@@ -334,7 +336,10 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 					     2, true);
 	
 //TODO: is this check necessary?
-//	if (glintPoints.size() == 6){ //only if exactly hardcoded six are found->?
+//	if (glintPoints.size() == 6){ //only if exactly hardcoded six are found->?  Se palauttaa AINA N_leds glinttiä. t: Miika
+
+	// std::cout << glintPoints_prev << std::endl;
+	// std::cout << std::endl;
 
 	glintPoints_prev = glintPoints;
 	pt->addTimeStamp("glintpoints");

@@ -101,6 +101,7 @@ int _tmain(int argc, _TCHAR* argv[])
     cams.push_back(new cv::VideoCapture());
     //		cams[i]->open("../videos/video" + std::to_string(i) + ".avi");
     if (!cams[i]->open("../videos/cam" + std::to_string(i + 1) + ".mjpg")) {
+    //if (!cams[i]->open("../videos/sg01_cam" + std::to_string(i + 1) + ".mjpg")) {
       std::cout << "Could not open video file" << std::endl;
       break;
     }
@@ -173,7 +174,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	  cv::imshow(wn0, *sceneImg);
 
 	  counter++;
-	  std::cout << counter << std::endl;
+	  //std::cout << counter << std::endl;
 
 	  //delete myframe;
 	  myframe.reset();
