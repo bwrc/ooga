@@ -30,7 +30,8 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	//TODO: read these from setting / function params
 	int cols = 640;
 	int rows = 480;
-	this->setCropWindowSize(150, 100, 350, 350);  // todo: we could crop heavier
+	//this->setCropWindowSize(150, 100, 350, 350);  // todo: we could crop heavier
+	this->setCropWindowSize(170, 110, 250, 210);  // todo: we could crop heavier
 	lambda_ed = 0.02;  // initial guess
 	alpha_ed = 500;  // initial guess
 	//theta = -1;
@@ -112,7 +113,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 		MU_Y[i] = MU_Y_mat.at<float>(0, i);
 	}
 
-	//std::cout << MU_X_mat << std::endl; exit(8);
+	//std::cout << MU_X_mat << std::endl; exit(8);  // poista
 
 	cv::FileStorage fs("calibration/parameters.yaml", cv::FileStorage::READ);
 	fs["glint_beta"] >> glint_beta;
@@ -200,7 +201,9 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 		pupilEllipsePoints_prev_eyecam[i] = cv::Point2d(0, 0);
 	}
 
-	K9_matrix = cv::Mat::eye(3, 3, K9_matrix.type());
+
+	//K9_matrix = cv::Mat::eye(3, 3, K9_matrix.type());  // Why, oh why? t: Miika
+
 
 	//TODO: read these from a file (for both eyes)
 
@@ -330,16 +333,15 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 //	glintPoints = glintfinder->getGlints_old_not_scale_invariant(diffimg, pupil_center, glintPoints_prev,
 //		theta, glint_kernel, score, glint_scores, glint_beta, glint_reg_coef);
 
+	//glintPoints_tmp = glintPoints_prev;  // poista
+
 	glintPoints = glintfinder->getGlints(diffimg,
 					     pupil_center, glintPoints_prev, theta, glint_kernel,
 					     score, glint_scores, glint_beta, glint_reg_coef,
-					     2, true);
+					     2, true);  // TODO: N_glint_candidates as "true" argument (it doesn't do shit now)
 	
 //TODO: is this check necessary?
 //	if (glintPoints.size() == 6){ //only if exactly hardcoded six are found->?  Se palauttaa AINA N_leds glinttiä. t: Miika
-
-	// std::cout << glintPoints_prev << std::endl;
-	// std::cout << std::endl;
 
 	glintPoints_prev = glintPoints;
 	pt->addTimeStamp("glintpoints");
@@ -438,7 +440,7 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 
 	trackres->glintPoints = glintPoints;
 	trackres->corneaCenter3D = Cc3d;
-	trackres->gazeDirectionVector = K9_times_gaze_dir_point;
+	trackres->gazeDirectionVector = K9_times_gaze_dir_point / cv::norm(K9_times_gaze_dir_point);
 	trackres->score = score;
 
 	//TODO: insert tracking results to frame, visualize in main thread

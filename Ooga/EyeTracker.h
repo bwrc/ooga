@@ -47,6 +47,9 @@ public:
 			     double &theta);
 	void setCropWindowSize(int xmin, int ymin, int width, int height);
 
+
+	std::vector<cv::Point2d> glintPoints_tmp;  // this can be removed
+
 private:
 	int framecounter;
 	std::mutex m_lock;

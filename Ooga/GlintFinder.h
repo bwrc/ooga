@@ -78,8 +78,8 @@ private:
 	cv::UMat eyeImage_cropped;
 	cv::UMat eyeImage_aux_crop;
 
-  int framecounter = 0;
-	float scale = 40.0f;
+	int framecounter = 0;
+	float scale = 40.0f;  // TODO: read these from files (left and right scale separately)
 
 	float MU_X[6], MU_Y[6];
 	cv::Mat CM;

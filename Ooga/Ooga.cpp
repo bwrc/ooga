@@ -100,8 +100,8 @@ int _tmain(int argc, _TCHAR* argv[])
   for (int i = 0; i < 3; i++){
     cams.push_back(new cv::VideoCapture());
     //		cams[i]->open("../videos/video" + std::to_string(i) + ".avi");
-    if (!cams[i]->open("../videos/cam" + std::to_string(i + 1) + ".mjpg")) {
-    //if (!cams[i]->open("../videos/sg01_cam" + std::to_string(i + 1) + ".mjpg")) {
+    //if (!cams[i]->open("../videos/cam" + std::to_string(i + 1) + ".mjpg")) {
+    if (!cams[i]->open("../videos/sg01_cam" + std::to_string(i + 1) + ".mjpg")) {
       std::cout << "Could not open video file" << std::endl;
       break;
     }
@@ -138,9 +138,9 @@ int _tmain(int argc, _TCHAR* argv[])
   cv::namedWindow(wn0, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
   cv::namedWindow(wn1, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
   cv::namedWindow(wn2, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
-  cv::moveWindow(wn2, 10, 500);
-  cv::moveWindow(wn1, 650, 500);
-  cv::moveWindow(wn0, 330, 50);
+  cv::moveWindow(wn2, 110, 500); // Lisäsin 100 x-suuntaan t: Miika
+  cv::moveWindow(wn1, 750, 500);
+  cv::moveWindow(wn0, 430, 50);
 
   bool stopThisNonsense = false;
   bool displayStats = true;

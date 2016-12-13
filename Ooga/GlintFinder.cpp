@@ -3,7 +3,7 @@
 //#define DEBUGFILE
 
 #define N_LEDS 6
-#define N_GLINT_CANDIDATES 2
+#define N_GLINT_CANDIDATES 6
 
 // TODO: Give N_glint_candidates as input parameter! t: Miikax
 
@@ -56,7 +56,7 @@ GlintFinder::GlintFinder()
 	pt = new TPerformanceTimer();
 
 	framecounter = 0;
-	float scale = 40.0f;
+	float scale = 40.0f;   // TODO: read these from files (left and right scale separately)
 }
 
 
@@ -117,6 +117,10 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 	//		int b = eyeImage_diff.size().height;
 	//		assert((eyeImage_diff.size().width == cropsizeX) && (eyeImage_diff.size().height == cropsizeY));
 
+  // TODO: Now the scale is shared by the left and right eye processes?? --> Set as argument, as is theta now. t: Miika
+
+  //theta = -1;  (use this to test the effect of dynamic prior... t: Miika)
+
 	if (DO_PERF_T) pt->start();
 
 	// Set parameters:
@@ -136,7 +140,7 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 	float beta = glint_beta;
 	float reg_coef = glint_reg_coef;
 
-	N_glint_candidates = N_GLINT_CANDIDATES;  // todo: this should be the input argument!!
+	N_glint_candidates = N_GLINT_CANDIDATES;  // todo: this should be an input argument!!
 
 	// Initialize variables
 	int N_particles = N_leds * N_glint_candidates;
@@ -630,7 +634,7 @@ std::vector<cv::Point2d> GlintFinder::getGlints_old_not_scale_invariant(cv::UMat
 	*/
 {
 
-  // Voiko tämän poistaa? t: Miika
+  // Voisiko tämän poistaa? t: Miika
 
 	assert((eyeImage_diff.size().width == cropsizeX) && (eyeImage_diff.size().height == cropsizeY));
 

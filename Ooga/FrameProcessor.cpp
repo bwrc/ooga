@@ -31,9 +31,9 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 	etLeft->InitAndConfigure( FrameSrc::EYE_L, CM_fn_left, glintmodel_fn, K9_matrix_fn );
 	etRight->InitAndConfigure(FrameSrc::EYE_R, CM_fn_right, glintmodel_fn, K9_matrix_fn );
 
-	cv::FileStorage fs(K9_matrix_fn, cv::FileStorage::READ);
-	fs["K9_left"] >> K9_left;
-	fs["K9_right"] >> K9_right;
+	//cv::FileStorage fs(K9_matrix_fn, cv::FileStorage::READ);
+	// fs["K9_left"] >> K9_left;  // nää oli turhia (ellei sitten kalibroinnissa) t: Miika
+	// fs["K9_right"] >> K9_right;
 
 	//st = new TSceneTracker();
 	//st->SetCamFeedSource(FrameSrc::SCENE);
@@ -112,7 +112,7 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 	//param_est = cv::Mat_<double>(4, 1) << pog_scam.x, pog_scam.y, 0, 0;
 	param_est = cv::Mat::zeros(4,1, CV_64F);
 	P_est = cv::Mat::eye(4, 4, CV_64F);
-	pog_scam_prev = cv::Point2d(320,240); // TODO: This should be "pog_scam" first time!
+	pog_scam_prev = cv::Point2d(320,240); // TODO: This should be "pog_scam" the first time!
 
 
 
@@ -182,7 +182,7 @@ void FrameProcessor::Process()
       try{
 	blockWhilePaused();
 
-	_start = hrclock::now();  // if commented, compute cumulative time; else, compute time per frame
+	//_start = hrclock::now();  // if commented, compute cumulative time; else, compute time per frame
 
 	//TBinocularFrame* frame;
 	auto frame = std::shared_ptr<TBinocularFrame>(nullptr);
@@ -192,6 +192,7 @@ void FrameProcessor::Process()
 
 	  my_mtx.lock();
 
+	  _start = hrclock::now();  // if commented, compute cumulative time; else, compute time per frame
 	  hrclock::time_point processingTimeStart = hrclock::now();
 
 	  cv::Point3d pupilCenter3DL, corneaCenter3DL;
@@ -211,6 +212,7 @@ void FrameProcessor::Process()
 
 	  //std::thread thr_eR = std::thread(&EyeTracker::Process, etRight, frame->getImg(FrameSrc::EYE_R), resR, pupilCenter3DL, corneaCenter3DL);
 	  etRight->Process(frame->getImg(FrameSrc::EYE_R), resR, pupilCenter3DR, corneaCenter3DR, thetaR);
+
 
 	  thr_eL.join();
 	  //thr_eR.join();
@@ -233,47 +235,47 @@ void FrameProcessor::Process()
 	  resL->pupilCenter3D.y = pc_l2r(1);
 	  resL->pupilCenter3D.z = pc_l2r(2);
 
-	  bool USE_KAPPA_CORRECTION = false;  // DON'T USE "KAPPA_CORRECTION", IT WAS JUST A TEST!
-
 	  cv::Point3d gazeVectorR;
 	  cv::Point3d gazeVectorL;
 
+	  bool USE_KAPPA_CORRECTION = false;  // DON'T USE "KAPPA_CORRECTION", IT WAS JUST A TEST!
+
 	  /// TODO: DON'T USE "KAPPA_CORRECTION", IT WAS JUST A TEST
 	  /// TODO: ADD USER CALIBRATION!
-	  if (USE_KAPPA_CORRECTION){
-	    cv::Mat x_vec = cv::Mat(cv::Point3f(resR->corneaCenter3D - resL->corneaCenter3D ));
-	    cv::Mat y_vec = cv::Mat(cv::Point3f(resR->pupilCenter3D - resL->pupilCenter3D)).cross(x_vec);
-	    cv::Mat z_vec = x_vec.cross(y_vec);
-	    x_vec = x_vec / norm(x_vec);
-	    y_vec = y_vec / norm(y_vec);
-	    z_vec = z_vec / norm(z_vec);
-	    cv::Mat xy; cv::hconcat(x_vec, y_vec, xy);
-	    cv::Mat R_aug2world; cv::hconcat(xy, z_vec, R_aug2world);
-	    cv::Mat R_world2aug = R_aug2world.inv();
+	  // if (USE_KAPPA_CORRECTION){
+	  //   cv::Mat x_vec = cv::Mat(cv::Point3f(resR->corneaCenter3D - resL->corneaCenter3D ));
+	  //   cv::Mat y_vec = cv::Mat(cv::Point3f(resR->pupilCenter3D - resL->pupilCenter3D)).cross(x_vec);
+	  //   cv::Mat z_vec = x_vec.cross(y_vec);
+	  //   x_vec = x_vec / norm(x_vec);
+	  //   y_vec = y_vec / norm(y_vec);
+	  //   z_vec = z_vec / norm(z_vec);
+	  //   cv::Mat xy; cv::hconcat(x_vec, y_vec, xy);
+	  //   cv::Mat R_aug2world; cv::hconcat(xy, z_vec, R_aug2world);
+	  //   cv::Mat R_world2aug = R_aug2world.inv();
 
-	    //right eye
-	    cv::Point3f pupil_cornea_vectorR = cv::Point3f(resR->pupilCenter3D - resR->corneaCenter3D);
-	    cv::Mat gaze_vec_in_augR = R_world2aug * cv::Mat(pupil_cornea_vectorR) / norm(pupil_cornea_vectorR);
-	    cv::Mat gaze_vec_in_aug_corrR = K9_right * gaze_vec_in_augR;
-	    cv::Mat gaze_vec_in_worldR = R_aug2world * gaze_vec_in_aug_corrR;
+	  //   //right eye
+	  //   cv::Point3f pupil_cornea_vectorR = cv::Point3f(resR->pupilCenter3D - resR->corneaCenter3D);
+	  //   cv::Mat gaze_vec_in_augR = R_world2aug * cv::Mat(pupil_cornea_vectorR) / norm(pupil_cornea_vectorR);
+	  //   cv::Mat gaze_vec_in_aug_corrR = K9_right * gaze_vec_in_augR;
+	  //   cv::Mat gaze_vec_in_worldR = R_aug2world * gaze_vec_in_aug_corrR;
 
-	    //left eye
-	    cv::Point3f pupil_cornea_vectorL = cv::Point3f(resL->pupilCenter3D - resL->pupilCenter3D);
-	    cv::Mat gaze_vec_in_augL = R_world2aug * cv::Mat(pupil_cornea_vectorL) / norm(pupil_cornea_vectorL);
-	    cv::Mat gaze_vec_in_aug_corrL = K9_left * gaze_vec_in_augL;
-	    cv::Mat gaze_vec_in_worldL = R_aug2world * gaze_vec_in_aug_corrL;
+	  //   //left eye
+	  //   cv::Point3f pupil_cornea_vectorL = cv::Point3f(resL->pupilCenter3D - resL->pupilCenter3D);
+	  //   cv::Mat gaze_vec_in_augL = R_world2aug * cv::Mat(pupil_cornea_vectorL) / norm(pupil_cornea_vectorL);
+	  //   cv::Mat gaze_vec_in_aug_corrL = K9_left * gaze_vec_in_augL;
+	  //   cv::Mat gaze_vec_in_worldL = R_aug2world * gaze_vec_in_aug_corrL;
 
-	    //gaze_vectors.push_back(cv::Point3d(gaze_vec_in_world.at<float>(0), gaze_vec_in_world.at<float>(1), gaze_vec_in_world.at<float>(2)));
-	    //gaze_vectors.push_back(cv::Point3d(gaze_vec_in_world2.at<float>(0), gaze_vec_in_world2.at<float>(1), gaze_vec_in_world2.at<float>(2)));
-	    gazeVectorR = cv::Point3d(gaze_vec_in_worldR.at<float>(0), gaze_vec_in_worldR.at<float>(1), gaze_vec_in_worldR.at<float>(2));
-	    gazeVectorL = cv::Point3d(gaze_vec_in_worldR.at<float>(0), gaze_vec_in_worldR.at<float>(1), gaze_vec_in_worldR.at<float>(2));
+	  //   //gaze_vectors.push_back(cv::Point3d(gaze_vec_in_world.at<float>(0), gaze_vec_in_world.at<float>(1), gaze_vec_in_world.at<float>(2)));
+	  //   //gaze_vectors.push_back(cv::Point3d(gaze_vec_in_world2.at<float>(0), gaze_vec_in_world2.at<float>(1), gaze_vec_in_world2.at<float>(2)));
+	  //   gazeVectorR = cv::Point3d(gaze_vec_in_worldR.at<float>(0), gaze_vec_in_worldR.at<float>(1), gaze_vec_in_worldR.at<float>(2));
+	  //   gazeVectorL = cv::Point3d(gaze_vec_in_worldR.at<float>(0), gaze_vec_in_worldR.at<float>(1), gaze_vec_in_worldR.at<float>(2));
 
-	  }
-	  else {
+	  // }
+	  // else {
 	    //gaze_vectors.push_back(K9_times_gaze_dir_point);
-	    gazeVectorR = resR->gazeDirectionVector;
-	    gazeVectorL = resR->gazeDirectionVector;
-	  }
+	  // gazeVectorR = resR->gazeDirectionVector;  // nää oli turhia... t: Miika
+	  // gazeVectorL = resR->gazeDirectionVector;
+	    //}
 
 	  int blinking = 0;
 	  if (resR->score + resL->score > 0.7) {  // good scores --> not blinking
@@ -348,10 +350,11 @@ void FrameProcessor::Process()
 	  }
 
 	  if (using_both_eyes) {  // two cameras (and using both eyes)
+
 	    cv::Point3d cr = resR->corneaCenter3D; // Right cornea center
 	    cv::Point3d cl = resL->corneaCenter3D;  // Left cornea center
-	    cv::Point3d gr = resR->gazeDirectionVector / norm(resR->gazeDirectionVector);  // Right gaze vector (must be normalized)
-	    cv::Point3d gl = resL->gazeDirectionVector / norm(resL->gazeDirectionVector);   // Left gaze vector (must be normalized)
+	    cv::Point3d gr = resR->gazeDirectionVector;// / norm(resR->gazeDirectionVector);  // Right gaze vector (must be normalized) (it was t: Miika)
+	    cv::Point3d gl = resL->gazeDirectionVector;// / norm(resL->gazeDirectionVector);   // Left gaze vector (must be normalized)
 
 	    // compute the gaze point as the 3d point with smallest square distance to the two gaze vectors. Results in noisy estimates, especially when looking further away.
 	    // double gaze_dist_left2 = 1 / (1 - gr.dot(gl) * gl.dot(gr)) * (cr.dot(gl) - cl.dot(gl) + gr.dot(gl)*cl.dot(gr) - gr.dot(gl) * cr.dot(gr));  // "old" method, noisy...
@@ -366,6 +369,9 @@ void FrameProcessor::Process()
 	    //TODO: this is now in right eye coordinates, right? -> use of A_r2s below
 	    gazePoint_ecam = (cv::Point3d(cl + gaze_dist_left*gl) + cv::Point3d(cr + gaze_dist_right*gr)) / 2;  // The computed gaze point is in the right (user's right) eye cam coordinates
 	  }
+
+	  //else { 	    std::cout << " NOT using both eyes " << std::endl; }  // voi poistaa.... t: Miika
+
 
 	  double pog_x, pog_y;
 
@@ -384,24 +390,27 @@ void FrameProcessor::Process()
 
 	  cv::Point2d pog_scam(pog_x, pog_y);
 
-	  bool USE_KALMAN = true;
+	  bool USE_KALMAN = 1;  // TODO: define elsewhere
+
+	  cv::UMat* sceneImage = frame->getImg(FrameSrc::SCENE);  // moved this here t: Miika
+	  cv::flip(*sceneImage, *sceneImage, 1);    // The scene camera is upside down (t: Miika)
+	  cv::flip(*sceneImage, *sceneImage, 0); 
 
 	  if (USE_KALMAN) {
+	    cv::circle(*sceneImage, pog_scam, 15, cv::Scalar(0, 150, 0), -1, 8);  // Plot the un-filtered point
 	    cv::Point2d velo_meas = (pog_scam - pog_scam_prev) * theta_mean;  //  (theta_mean is averaged over L and R)
 	    pog_scam_prev = pog_scam;
 	    loc_variance = kalman_R_max * (1-theta_mean); // location observation variance
 	    kalmanFilterGazePoint(pog_scam, velo_meas, &param_est, &P_est, loc_variance);  // theta <---> R_sigma ?
-
 	    pog_scam.x = param_est.at<double>(0);
 	    pog_scam.y = param_est.at<double>(1);
-
 	  }
 
 
 	  //// ----- The actual algorithms end (apart from some calibration related computations...) -----
 
 	  /*
-	    if (USE_FOVEATED_SMOOTHING) {
+	    if (USE_FOVEATED_SMOOTHING) {  // voiko tän poistaa? t: Miika
 	    sceneImage.convertTo(sceneImage, CV_32FC3);
 	    Mat sceneImage_blur;
 	    GaussianBlur(sceneImage, sceneImage_blur, Size(21, 21), 51);
@@ -422,10 +431,12 @@ void FrameProcessor::Process()
 
 	  //std::cout << "FRAME_NR: " << frame->getNumber() << std::endl;  // miikan poisto
 
-	  cv::UMat* sceneImage = frame->getImg(FrameSrc::SCENE);
+	  //cv::UMat* sceneImage = frame->getImg(FrameSrc::SCENE);  // moved upper...
+
+
 	  // Draw the pog in the scene image. Adjust its size according to the glint fit score (of the "last" camera!).
 	  cv::circle(*sceneImage, pog_scam, 35 * (1 - best_score) + 5, cv::Scalar(0, 0, 250), 7, 8);
-
+	  
 	  if (blinking) {
 	    cv::putText(*sceneImage, "BLINK ", cv::Point2d(100, 300), CV_FONT_HERSHEY_PLAIN, 10, CV_RGB(250, 0, 100), 5);
 	  }
@@ -476,7 +487,6 @@ void FrameProcessor::Process()
 	    // 		6, cv::Scalar(0, 255, 0), -1, 8);
 	    // }
 	  }
-	  cv::waitKey(100);
 
 	  //qOut->enqueue(frame);
 	  qOut->push(frame); //this doesn't probably need the balancing behavior? so could be a concurrent_queue as well..?
@@ -487,7 +497,7 @@ void FrameProcessor::Process()
 	  my_mtx.unlock();
 
 	  // msecs frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
-	  // std::cout << frameTime.count() << std::endl;  // miikan muutos
+	  // std::cout << frameTime.count() << std::endl;  // miikan kellotus
 			
 	}
 
