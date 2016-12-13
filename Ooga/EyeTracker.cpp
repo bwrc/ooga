@@ -30,7 +30,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	//TODO: read these from setting / function params
 	int cols = 640;
 	int rows = 480;
-	this->setCropWindowSize(150, 100, 350, 350);
+	this->setCropWindowSize(150, 100, 350, 350);  // todo: we can crop heavier
 	lambda_ed = 0.02;  // initial guess
 	alpha_ed = 500;  // initial guess
 	//theta = -1;
@@ -112,6 +112,8 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 		MU_Y[i] = MU_Y_mat.at<float>(0, i);
 	}
 
+	//std::cout << MU_X_mat << std::endl; exit(8);
+
 	cv::FileStorage fs("calibration/parameters.yaml", cv::FileStorage::READ);
 	fs["glint_beta"] >> glint_beta;
 	fs["glint_reg_coef"] >> glint_reg_coef;
@@ -163,7 +165,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 
 	eyeCam = new Camera();
 
-// Vasen ja oikea oli väärin, korjasin. t: Miika
+	// Vasen ja oikea oli väärin, korjasin. t: Miika
 	if (myEye == FrameSrc::EYE_R){  // NOT: if (myEye == FrameSrc::EYE_L){
 		double eye_intr[9] = { 706.016649148281, 0, 0, 0, 701.594050122496, 0, 325.516892970862, 229.074499749446, 1 };
 		double eye_dist[5] = { -0.0592552807088912, -0.356035882388608, -0.00499637342440711, -0.00186924287347176, 0.041261857952091 };
@@ -178,7 +180,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	}
 
 	// Calibration related stuff
-	//not used?
+	//not used? Not used here!
 	//A_rot = (cv::Mat_<float>(3, 3) << A(0, 0), A(0, 1), A(0, 2), A(1, 0), A(1, 1), A(1, 2), A(2, 0), A(2, 1), A(2, 2));
 	//a_tr = (cv::Mat_<float>(3, 1) << A(0, 3), A(1, 3), A(2, 3));
 	//invA_rot;
@@ -222,7 +224,6 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	  eigLED << -0.023768, -0.021550, 0.026207,  led_pos.push_back(eigLED);
 	  eigLED << -0.016759, -0.007479, 0.020235,  led_pos.push_back(eigLED);
 
-
 	}
 	else if (myEye == FrameSrc::EYE_R) { // new right eye
 	  // Optics based measures:
@@ -255,6 +256,9 @@ void EyeTracker::setCropWindowSize(int xmin, int ymin, int width, int height)
 
 void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Point3d &pupilCenter3D, cv::Point3d &corneaCenter3D, double &theta)
 {
+
+  // Miksi tämä "palauttaa" &pupilCenter3D ja &corneaCenter3D, kun ne kuitenkin ovat trackres:n tietueita?
+
 	pt->start();
 
 	//TODO: just do this for the cropped part?
@@ -266,9 +270,6 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 */
 
 	pt->addTimeStamp("converted");
-
-	//if ganzheit frames (through mirror), flip eye image!
-	//flip( gray, gray );
 
 	// crop
 	cropped = gray(cv::Rect(cropminX, cropminY, cropsizeX, cropsizeY)).clone();

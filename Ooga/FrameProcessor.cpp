@@ -26,6 +26,7 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 	std::string CM_fn_right = "../calibration/file_CM_right";
 	std::string glintmodel_fn = "../calibration/glint_model.yaml";
 	std::string K9_matrix_fn = "../calibration/K9.yaml";
+	std::string parameters_fn = "../calibration/parameters.yaml";
 
 	etLeft->InitAndConfigure( FrameSrc::EYE_L, CM_fn_left, glintmodel_fn, K9_matrix_fn );
 	etRight->InitAndConfigure(FrameSrc::EYE_R, CM_fn_right, glintmodel_fn, K9_matrix_fn );
@@ -44,40 +45,59 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 
 	//TODO: Load these from config files
 
-	//These are the matrices that transform (augmented) coordinates from the eye camera to the scene camera
-	A_l2s << 0.999527, -0.010507, -0.028904, 0.024822,
-			0.002372, -0.910701, 0.413060, -0.050344,
-			-0.030663, -0.412933, -0.910245, 0.005679,
-			0.000000, 0.000000, 0.000000, 1.000000;
+	//// These are the matrices that transform (augmented) coordinates from the eye camera to the scene camera
+	// A_l2s << 0.999527, -0.010507, -0.028904, 0.024822,     (useless!)
+	// 		0.002372, -0.910701, 0.413060, -0.050344,
+	// 		-0.030663, -0.412933, -0.910245, 0.005679,
+	// 		0.000000, 0.000000, 0.000000, 1.000000;
 
-	A_r2s << 0.999970, -0.007446, 0.002042, -0.032355,
-			-0.007611, -0.906227, 0.422724, -0.042055,
-			-0.001297, -0.422726, -0.906256, -0.001406,
-			0.000000, 0.000000, 0.000000, 1.000000;
+	// Estimated with the optics-based hardware calibration scheme:
+	// A_r2s << 0.999970, -0.007446, 0.002042, -0.032355,
+	// 		-0.007611, -0.906227, 0.422724, -0.042055,
+	// 		-0.001297, -0.422726, -0.906256, -0.001406,
+	// 		0.000000, 0.000000, 0.000000, 1.000000;
 
-	// the transformation from left eye camera to the right eye camera
-	A_l2r << 0.999519, -0.003039, -0.030866, 0.057229,
-		0.003370, 0.999937, 0.010674, 0.004091,
-		0.030832, -0.010772, 0.999467, -0.009809,
-		0.000000, 0.000000, 0.000000, 1.000000;
+	// Computed from the 3D model (one rotation of 23 degrees + translation):
+	A_r2s << 1.000000, -0.000000, -0.000000, -0.031000, 
+	  0.000000, -0.920505, 0.390731, -0.029422, 
+	  0.000000, -0.390731, -0.920505, 0.023737, 
+	  0.000000, 0.000000, 0.000000, 1.000000;
+	
+
+	//// the transformation from left eye camera to the right eye camera
+
+	// Optics based measures:
+	// A_l2r << 0.999519, -0.003039, -0.030866, 0.057229,
+	// 	0.003370, 0.999937, 0.010674, 0.004091,
+	// 	0.030832, -0.010772, 0.999467, -0.009809,
+	// 	0.000000, 0.000000, 0.000000, 1.000000;
+
+	// 3D model based measures:
+	A_l2r << 1, 0, 0, 0.062,
+	  0, 1, 0, 0,
+	  0, 0, 1, 0,
+	  0, 0, 0, 1;
 
 
 	//SETUP CAMERA MATRICES
 	//TODO: read these from cal file
-	eyeCamL = new Camera();
-	eyeCamR = new Camera();
+	// Silmäkamerat ovat tässä turhia (ja L ja R oli väärinpäin) t: Miika
+
+	// eyeCamL = new Camera();
+	// eyeCamR = new Camera();
 	sceneCam = new Camera();
 
 	//left
-	double eye_intrL[9] = { 706.016649148281, 0, 0, 0, 701.594050122496, 0, 325.516892970862, 229.074499749446, 1 };
-	double eye_distL[5] = { -0.0592552807088912, -0.356035882388608, -0.00499637342440711, -0.00186924287347176, 0.041261857952091 };
-	eyeCamL->setIntrinsicMatrix(eye_intrL);
-	eyeCamL->setDistortion(eye_distL);
-	//right
-	double eye_intrR[9] = { 789.311956305243, 0, 0, 0, 785.608590236097, 0, 318.745586281075, 217.585069948245, 1 };
-	double eye_distR[5] = { -0.0683374878811475, -0.57464673534425, 0.00189640729826507, 0.00224588599102401, 0.61174675760327 };
-	eyeCamR->setIntrinsicMatrix(eye_intrR);
-	eyeCamR->setDistortion(eye_distR);
+	// double eye_intrL[9] = { 706.016649148281, 0, 0, 0, 701.594050122496, 0, 325.516892970862, 229.074499749446, 1 };
+	// double eye_distL[5] = { -0.0592552807088912, -0.356035882388608, -0.00499637342440711, -0.00186924287347176, 0.041261857952091 };
+	// eyeCamL->setIntrinsicMatrix(eye_intrL);
+	// eyeCamL->setDistortion(eye_distL);
+	// //right
+	// double eye_intrR[9] = { 789.311956305243, 0, 0, 0, 785.608590236097, 0, 318.745586281075, 217.585069948245, 1 };
+	// double eye_distR[5] = { -0.0683374878811475, -0.57464673534425, 0.00189640729826507, 0.00224588599102401, 0.61174675760327 };
+	// eyeCamR->setIntrinsicMatrix(eye_intrR);
+	// eyeCamR->setDistortion(eye_distR);
+
 	//scene
 	double scene_intr[9] = { 611.3922, 0, 0, 0, 613.3425, 0, 321.8853, 239.7948, 1.0000 };
 	double scene_dist[5] = { 0.026858, -0.212083, 0.002701, -0.002490, 0.494850 };
@@ -85,10 +105,9 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 	sceneCam->setDistortion(scene_dist);
 
 
-
 	// I made it read it here (Miika)
-	//cv::FileStorage fs2("calibration/parameters.yaml", cv::FileStorage::READ);
-	fs["kalman_R_max"] >> kalman_R_max;
+	cv::FileStorage fs2(parameters_fn, cv::FileStorage::READ);
+	fs2["kalman_R_max"] >> kalman_R_max;
 
 	//param_est = cv::Mat_<double>(4, 1) << pog_scam.x, pog_scam.y, 0, 0;
 	param_est = cv::Mat::zeros(4,1, CV_64F);
@@ -196,7 +215,7 @@ void FrameProcessor::Process()
 	  thr_eL.join();
 	  //thr_eR.join();
 
-	  //Now we have results for both eyes -> combine
+	  //Now we have results for both eyes --> combine
 	  theta_mean = (thetaL + thetaR) / 2.0;
 
 	  //transform 3D features from left to right camera coordinates for combining
@@ -362,25 +381,6 @@ void FrameProcessor::Process()
 	  //scene cam is upside down in the current frame
 	  pog_x = imgSize.x - pog_x;
 	  pog_y = imgSize.y - pog_y;
-
-	  /*if (USE_CONST_DIST_FOR_BOTH_CAMS & Neyecams == 2) {  // dummy test (draw also second camera's pog with constant distance)
-	    double pog_x2, pog_y2;
-	    for (int ne = 0; ne<2; ne++) {
-	    cv::Point3d gazePoint_ecam = cornea_centers_3D[ne] + gaze_dist * gaze_vectors[ne];
-	    Eigen::Vector4d gazePoint_ecam_aug(gazePoint_ecam.x, gazePoint_ecam.y, gazePoint_ecam.z, 1);
-	    Eigen::Vector4d gazePoint_scam_aug = A * gazePoint_ecam_aug;
-	    cv::Point3d gazePoint_scam = cv::Point3d(gazePoint_scam_aug(0), gazePoint_scam_aug(1), gazePoint_scam_aug(2));
-	    sceneCam.worldToPix(gazePoint_scam, &pog_x2, &pog_y2);
-	    if (FRAMES_ID == 4 || FRAMES_ID == 5) {
-	    pog_x2 = Shori - pog_x2;
-	    pog_y2 = Svert - pog_y2;
-	    }  // The scene camera here is upside down
-	    cv::Point2d pog_scam(pog_x2, pog_y2);
-	    circle(sceneImage, pog_scam, 15, Scalar(0, 150, 150), 5, 8); // Dark yellow circle(s)
-	    }
-	    }
-	  */
-	  //} !realsense
 
 	  cv::Point2d pog_scam(pog_x, pog_y);
 
