@@ -33,21 +33,22 @@ cv::RotatedRect PupilEstimator::getPupilEllipse(cv::Mat eyeImage_opened, cv::Poi
 	x_max = std::min(Shori, float(pupil_center.x) + delta_x);
 	y_min = std::max(float(0), float(pupil_center.y) - delta_y);
 	y_max = std::min(Svert, float(pupil_center.y) + delta_y);
+	// Miksi ei kropata t‰ss‰?! t: Miika
 	//eyeImage_cropped = eyeImage_opened(cv::Range(y_min, y_max), cv::Range(x_min, x_max)); //t‰‰ on laillisuuden rajamailla, funktiokutsun mukaan ton ei pit‰is muokkaantua, 
-																						  //mutta nyt croppedin modaaminen muokkaisi sit‰. T‰‰ tosin vaan filtterˆid‰‰n, joten koko cropped on turha?
+	//mutta nyt croppedin modaaminen muokkaisi sit‰. T‰‰ tosin vaan filtterˆid‰‰n, joten koko cropped on turha?
 	pupil_center.x = pupil_center.x - x_min;   // Pupil center in the cropped image
 	pupil_center.y = pupil_center.y - y_min;   // Pupil center in the cropped image
 
 	// Filter the image (and crop away edges)
 	cv::filter2D(eyeImage_opened(cv::Range(y_min, y_max), cv::Range(x_min, x_max)), // <- was eyeImage_cropped
-			     eyeImage_filtered, -1, pupil_kernel, cv::Point(-1, -1), 0, cv::BORDER_REPLICATE);
+		     eyeImage_filtered, -1, pupil_kernel, cv::Point(-1, -1), 0, cv::BORDER_REPLICATE);
 
 	int delta_edge = 10;  // Crop the edges away
 	if (delta_edge > delta_x || delta_edge > delta_y) { std::cout << "delta_edge is larger than the image half " << std::endl; exit(-1); }
 	
 	//cv::Mat eyeImage_filtered_cropped = eyeImage_filtered(cv::Range(delta_edge, eyeImage_filtered.rows - delta_edge), cv::Range(delta_edge, eyeImage_filtered.cols - delta_edge));
 	morphologyEx(eyeImage_filtered(cv::Range(delta_edge, eyeImage_filtered.rows - delta_edge), cv::Range(delta_edge, eyeImage_filtered.cols - delta_edge)),
-		         eyeImage_closed, cv::MORPH_CLOSE, pupil_element);
+		     eyeImage_closed, cv::MORPH_CLOSE, pupil_element);
 	eyeImage_sum = eyeImage_filtered(cv::Range(delta_edge, eyeImage_filtered.rows - delta_edge), cv::Range(delta_edge, eyeImage_filtered.cols - delta_edge)) + eyeImage_closed; //cv::add might use optimized code?
 	pupil_center.x = pupil_center.x - delta_edge;   // Pupil center (x) in the cropped image
 	pupil_center.y = pupil_center.y - delta_edge;   // Pupil center (y) in the cropped image
@@ -65,7 +66,7 @@ cv::RotatedRect PupilEstimator::getPupilEllipse(cv::Mat eyeImage_opened, cv::Poi
 		// Get the connected components of the binary image
 		eyeImage_binary.convertTo(eyeImage_binary_8bit, CV_8UC1);
 	*/
-	int thold = floor(0.15 * 255);
+	int thold = floor(0.15 * 255);  // TODO: as input parameter (read it from file)
 	cv::normalize(eyeImage_sum, eyeImage_sum_scaled, 0, 255, cv::NORM_MINMAX, -1);
 	cv::threshold(eyeImage_sum_scaled, eyeImage_binary, thold, 255, cv::THRESH_BINARY_INV);
 	//the replacement for the commented bit above ends here
@@ -275,6 +276,9 @@ cv::RotatedRect PupilEstimator::getPupilEllipse(cv::Mat eyeImage_opened, cv::Poi
 
 void PupilEstimator::getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_center, cv::Mat pupil_kernel, cv::Mat pupil_element, bool pupil_iterate, float pupil_beta, cv::RotatedRect &pupilEllipse)
 {
+
+  // Onko t‰m‰ funktio turha? t: Miika
+
 	ITERATE = pupil_iterate;
 
 	float Svert = eyeImage_opened.rows;
@@ -300,7 +304,7 @@ void PupilEstimator::getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_
 
 	//cv::Mat eyeImage_filtered_cropped = eyeImage_filtered(cv::Range(delta_edge, eyeImage_filtered.rows - delta_edge), cv::Range(delta_edge, eyeImage_filtered.cols - delta_edge));
 	morphologyEx(eyeImage_filtered(cv::Range(delta_edge, eyeImage_filtered.rows - delta_edge), cv::Range(delta_edge, eyeImage_filtered.cols - delta_edge)),
-		eyeImage_closed, cv::MORPH_CLOSE, pupil_element);
+		     eyeImage_closed, cv::MORPH_CLOSE, pupil_element);
 	eyeImage_sum = eyeImage_filtered(cv::Range(delta_edge, eyeImage_filtered.rows - delta_edge), cv::Range(delta_edge, eyeImage_filtered.cols - delta_edge)) + eyeImage_closed; //cv::add might use optimized code?
 	pupil_center.x = pupil_center.x - delta_edge;   // Pupil center (x) in the cropped image
 	pupil_center.y = pupil_center.y - delta_edge;   // Pupil center (y) in the cropped image
@@ -534,6 +538,9 @@ void PupilEstimator::getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_
 
 void PupilEstimator::getPupilEllipseThreaded(cv::RotatedRect &pupilEllipse, cv::Mat eyeImage_opened, cv::Point2d pupil_center, cv::Mat pupil_kernel, cv::Mat pupil_element)
 {
+
+  // Onko t‰m‰ funktio turha? t: Miika
+
 
 	cv::Mat eyeImage_filtered;
 	//cv::Mat eyeImage_cropped; can be removed(?)

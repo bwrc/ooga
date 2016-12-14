@@ -102,7 +102,8 @@ int _tmain(int argc, _TCHAR* argv[])
   for (int i = 0; i < 3; i++){
     cams.push_back(new cv::VideoCapture());
     //		cams[i]->open("../videos/video" + std::to_string(i) + ".avi");
-    if (!cams[i]->open("../videos/cam" + std::to_string(i + 1) + ".mjpg")) {
+    //if (!cams[i]->open("../videos/cam" + std::to_string(i + 1) + ".mjpg")) {
+    if (!cams[i]->open("../videos/sg01_cam" + std::to_string(i + 1) + ".mjpg")) {
       std::cout << "Could not open video file" << std::endl;
       break;
     }
@@ -136,6 +137,7 @@ int _tmain(int argc, _TCHAR* argv[])
 /*  std::string wn0 = "cam0 | scene";
   std::string wn1 = "cam1 | left";
   std::string wn2 = "cam2 | right";
+
   cv::namedWindow(wn0, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
   cv::namedWindow(wn1, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
   cv::namedWindow(wn2, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
@@ -146,7 +148,14 @@ int _tmain(int argc, _TCHAR* argv[])
 
   OOGUI* oogui = new OOGUI();
   oogui->Initialize();
-
+/*=======
+  cv::namedWindow(wn0, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
+  cv::namedWindow(wn1, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
+  cv::namedWindow(wn2, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
+  cv::moveWindow(wn2, 110, 500); // Lisäsin 100 x-suuntaan t: Miika
+  cv::moveWindow(wn1, 750, 500);
+  cv::moveWindow(wn0, 430, 50);
+*/
   bool stopThisNonsense = false;
   bool displayStats = true;
 
@@ -187,6 +196,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	  oogui->pushFrame(imgs);
 
 	  counter++;
+	  //std::cout << counter << std::endl;
 
 	  //delete myframe;
 	  myframe.reset();
