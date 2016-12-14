@@ -3,7 +3,7 @@
 //#define DEBUGFILE
 
 #define N_LEDS 6
-#define N_GLINT_CANDIDATES 6
+#define N_GLINT_CANDIDATES 2
 
 // TODO: Give N_glint_candidates as input parameter! t: Miikax
 
@@ -192,6 +192,7 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 	double log_max_prior;
 	//float scales[N_glint_candidates*N_leds]; replaced with defined constants
 	float scales[N_GLINT_CANDIDATES*N_LEDS];
+	float scale_thisp;
 
 	x_min1 = std::max(0, int(pupil_center.x - delta_x));
 	x_max1 = std::min(Shori, int(pupil_center.x + delta_x));
@@ -302,12 +303,12 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 	if (DO_PERF_T) pt->addTimeStamp("orders");
 
 	int p = 0;
-	for (int n = 0; n < N_glint_candidates; n++) {
-		for (int j = 0; j < N_leds; j++) {
+	for (int n = 0; n < N_glint_candidates; n++) {     // loop glint candidates
+		for (int j = 0; j < N_leds; j++) {         // loop particles per one glint candidate
 			float log_post_MAP = 0;
 			double log_max_prior_value = 0;
 			eyeImage_aux = eyeImage_filtered_clone.clone();
-			for (int k = 1; k < N_leds; k++) { //operate on the same clone from this point on
+			for (int k = 1; k < N_leds; k++) { // loop components of one particle  (operate on the same clone from this point on)
 
 				// Insert zeros around the already sampled (i.e., previous) glint:
 				x_prev = glints_x[p][ORDERS[j][k - 1]];
@@ -349,22 +350,23 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 						MU_X_sofar_var += (MU_X_sofar[i] - MU_X_sofar_mean) * (MU_X_sofar[i] - MU_X_sofar_mean);
 						MU_Y_sofar_var += (MU_Y_sofar[i] - MU_Y_sofar_mean) * (MU_Y_sofar[i] - MU_Y_sofar_mean);
 					}
-					scale = std::sqrt(glints_x_sofar_var + glints_y_sofar_var) / std::sqrt(MU_X_sofar_var + MU_Y_sofar_var);
+					scale_thisp = std::sqrt(glints_x_sofar_var + glints_y_sofar_var) / std::sqrt(MU_X_sofar_var + MU_Y_sofar_var);
 					//!! explain the line above and below?
 					if (k == N_leds - 1) {
-						scales[p] = scale;
+						scales[p] = scale_thisp;
 					}
 				}
+				else { scale_thisp = scale; }
 
 				// Compute the mean without covariance (= "dummy mean"):
-				mu_dum.at<float>(0, 0) = glints_x_sofar_mean + (MU_X[ORDERS[j][k]] - MU_X_sofar_mean) * (scale);
-				mu_dum.at<float>(1, 0) = glints_y_sofar_mean + (MU_Y[ORDERS[j][k]] - MU_Y_sofar_mean) * (scale);
+				mu_dum.at<float>(0, 0) = glints_x_sofar_mean + (MU_X[ORDERS[j][k]] - MU_X_sofar_mean) * (scale_thisp);
+				mu_dum.at<float>(1, 0) = glints_y_sofar_mean + (MU_Y[ORDERS[j][k]] - MU_Y_sofar_mean) * (scale_thisp);
 
 				// Compute the conditional error:
 				cv::Mat error_cond(2 * k, 1, CV_32F);
 				for (int i = 0; i < k; i++) {
-					error_cond.at<float>(i, 0) = glints_x_sofar[i] - glints_x_sofar_mean - (MU_X_sofar[i] - MU_X_sofar_mean) * (scale);
-					error_cond.at<float>(k + i, 0) = glints_y_sofar[i] - glints_y_sofar_mean - (MU_Y_sofar[i] - MU_Y_sofar_mean) * (scale);
+					error_cond.at<float>(i, 0) = glints_x_sofar[i] - glints_x_sofar_mean - (MU_X_sofar[i] - MU_X_sofar_mean) * (scale_thisp);
+					error_cond.at<float>(k + i, 0) = glints_y_sofar[i] - glints_y_sofar_mean - (MU_Y_sofar[i] - MU_Y_sofar_mean) * (scale_thisp);
 				}
 
 				//delete the dynamical arrays
@@ -420,7 +422,7 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 				C_cond = CM_topLeft - CM_topRight * invCM_bottomRight * CM_bottomLeft;
 
 				// Scale the covariance
-				C_cond = C_cond * scale*scale;//(*scale)*(*scale);
+				C_cond = C_cond * scale_thisp*scale_thisp;//(*scale)*(*scale);
 
 				// Regularize the covariance (add elements to all matrix elements or only to diagonal elements?)
 				C_cond.at<float>(0, 0) = C_cond.at<float>(0, 0) + reg_coef*k;

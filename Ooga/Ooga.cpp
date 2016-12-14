@@ -100,8 +100,8 @@ int _tmain(int argc, _TCHAR* argv[])
   for (int i = 0; i < 3; i++){
     cams.push_back(new cv::VideoCapture());
     //		cams[i]->open("../videos/video" + std::to_string(i) + ".avi");
-    if (!cams[i]->open("../videos/cam" + std::to_string(i + 1) + ".mjpg")) {
-    //if (!cams[i]->open("../videos/sg01_cam" + std::to_string(i + 1) + ".mjpg")) {
+    //if (!cams[i]->open("../videos/cam" + std::to_string(i + 1) + ".mjpg")) {
+    if (!cams[i]->open("../videos/sg01_cam" + std::to_string(i + 1) + ".mjpg")) {
       std::cout << "Could not open video file" << std::endl;
       break;
     }
