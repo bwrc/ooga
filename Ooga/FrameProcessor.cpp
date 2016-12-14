@@ -467,10 +467,10 @@ void FrameProcessor::Process()
 	      cv::circle(*temp, cv::Point2d(g.x, g.y),
 			 6, cv::Scalar(255, 0, 0), -1, 8);
 	    }
-	    // for (auto& p : resR->pupilEllipsePoints){
-	    // 	cv::circle(*temp, cv::Point2d(p.x, p.y),
-	    // 		6, cv::Scalar(0, 255, 0), -1, 8);
-	    // }
+	    for (auto& p : resR->pupilEllipsePoints){
+	    	cv::circle(*temp, cv::Point2d(p.x, p.y),
+	    		6, cv::Scalar(0, 255, 0), -1, 8);
+	    }
 	  }
 	  temp = frame->getImg(FrameSrc::EYE_L);
 
@@ -482,10 +482,10 @@ void FrameProcessor::Process()
 	      cv::circle(*temp, cv::Point2d(g.x, g.y),
 			 6, cv::Scalar(255, 0, 0), -1, 8);
 	    }
-	    // for (auto& p : resL->pupilEllipsePoints){
-	    // 	cv::circle(*temp, cv::Point2d(p.x, p.y),
-	    // 		6, cv::Scalar(0, 255, 0), -1, 8);
-	    // }
+	    for (auto& p : resL->pupilEllipsePoints){
+	    	cv::circle(*temp, cv::Point2d(p.x, p.y),
+	    		6, cv::Scalar(0, 255, 0), -1, 8);
+	    }
 	  }
 
 	  //qOut->enqueue(frame);

@@ -6,11 +6,13 @@ cv::Point2d* getPupilEllipsePoints(cv::RotatedRect pupilEllipse, cv::Point2d pup
 
   // Compute the end points of major and minor axes of the ellipse,returned by fitEllipse function.
   // The first two points will be the major axis points, second two the minor axis points.
-  // pupilEllipse has zero angle with the box in 'vertical' orientation, with angles crowing anti-clockwise (i.e., the "normal" angle convention)
+  // PupilEllipse has zero angle with the box in 'vertical' orientation, with angles growing anti-clockwise (i.e., the "normal" angle convention).
   // Also, size.height should be the larger dimension, i.e., size.height > size.width should hold when returned by fitEllipse.
 
   static cv::Point2d pupilEllipsePoints[4];
   cv::Point2d pupilEllipsePoints_meas[4];
+
+  //std::cout << pupilEllipse.angle << " ---> " << cos(pupilEllipse.angle) << "  " << std::cos(pupilEllipse.angle) << std::endl; poista
 
   pupilEllipsePoints_meas[0].x = double(pupilEllipse.center.x + cos(pupilEllipse.angle) * pupilEllipse.size.height/2);
   pupilEllipsePoints_meas[0].y = double(pupilEllipse.center.y - sin(pupilEllipse.angle) * pupilEllipse.size.height/2);
@@ -21,21 +23,35 @@ cv::Point2d* getPupilEllipsePoints(cv::RotatedRect pupilEllipse, cv::Point2d pup
   pupilEllipsePoints_meas[3].x = double(pupilEllipse.center.x - sin(pupilEllipse.angle) * pupilEllipse.size.width/2);
   pupilEllipsePoints_meas[3].y = double(pupilEllipse.center.y - cos(pupilEllipse.angle) * pupilEllipse.size.width/2);
 
-  if (1) {      // Swap axis end points
+  if (1) {      // Swap axis end points (Yes, do it)  POISTA 0!
     for (int ind=0; ind<4; ind=ind+2) {
       if (NORM2(pupilEllipsePoints_meas[ind] , pupilEllipsePoints_prev[ind]) > NORM2(pupilEllipsePoints_meas[ind] , pupilEllipsePoints_prev[ind+1])) {
 	cv::Point2d tmp = pupilEllipsePoints_meas[ind];
 	pupilEllipsePoints_meas[ind] = pupilEllipsePoints_meas[ind+1];
 	pupilEllipsePoints_meas[ind+1] = tmp;
-	//cout << "SWAP! " << endl;
+	//std::cout << "SWAP! " << std::endl;
       }
     }
   }
+
+  theta = cv::max(theta, 0.2);  // Replace the troublesome filtering in the end of this function with this simple threshold for theta (Miika 22.9.2016)
+
+  //theta = 1; // POISTA!
 
   for (int i=0; i<4; i++)  {
     pupilEllipsePoints[i] = cv::Point2d(theta * pupilEllipsePoints_meas[i].x + (1-theta) * pupilEllipsePoints_prev[i].x, \
 					theta * pupilEllipsePoints_meas[i].y + (1-theta) * pupilEllipsePoints_prev[i].y);
   }
+
+  //std::cout << pupilEllipsePoints_meas[0].x << " ---> " << pupilEllipsePoints[0].x << std::endl;
+
+  if (1) {  // Skip the additional filtering and return here? (It's unnecessary now with the thresholded theta; Miika 22.9.2016)
+    return pupilEllipsePoints; }
+
+  /////////////////////////////////////////////////////////////////////////
+
+
+
 
   double pupil_diff;
   if (1) {  // This uses the pupil center and axis end point difference (to be preferred, I guess)
@@ -54,13 +70,21 @@ cv::Point2d* getPupilEllipsePoints(cv::RotatedRect pupilEllipse, cv::Point2d pup
       (pupilEllipsePoints[0].y + pupilEllipsePoints[1].y + pupilEllipsePoints[2].y + pupilEllipsePoints[3].y)/4;
   }
 
-  double gamma = 1.0 / (1 + exp(-1 * (pupil_diff - 3)));  // gamma = 1 --> rely only on observations, gamma = 0 --> filter heavily (depending on theta)
+  /// why such parameters? Often, pupil_diff ~= 0 --> gamma ~= 0.3775
+  //double gamma = 1.0 / (1 + exp(-1 * (pupil_diff - 5)));  // gamma = 1 --> rely only on observations, gamma = 0 --> filter heavily (depending on theta)
+  double gamma = 1.0 / (1 + exp(-1 * (pupil_diff - 0.5)));  // gamma = 1 --> rely only on observations, gamma = 0 --> filter heavily (depending on theta) (was 0.5)
+  
+  //std::cout << pupil_diff << " ----> " << gamma << std::endl;
+  //gamma = 0;  // We have Kalman filter now so don't desperately filter here?
+  
+  // gamma = 0.3;  // We could as well insert this as we must have gamma>0 in order for this filtering to work.
 
   for (int i=0; i<4; i++)  {
     pupilEllipsePoints[i].x = gamma * pupilEllipsePoints_meas[i].x + (1-gamma) * pupilEllipsePoints[i].x;
     pupilEllipsePoints[i].y = gamma * pupilEllipsePoints_meas[i].y + (1-gamma) * pupilEllipsePoints[i].y;
-    pupilEllipsePoints_prev[i] = pupilEllipsePoints[i];
+    pupilEllipsePoints_prev[i] = pupilEllipsePoints[i]; // store the previous points here
   }
+
 
   return pupilEllipsePoints;
 }
