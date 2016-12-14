@@ -38,6 +38,8 @@ environment: C:\Dev\gsl\x86\lib;C:\Dev\opencv3\bin\install\x86\vc12\bin;C:\Dev\b
 #include "FrameRateLimiter.h"
 #include "../utils/concurrent_queue.h"
 
+#include "../utils/OOGUI.h"
+
 #include "SG_common.h"
 
 // MAIN
@@ -131,7 +133,7 @@ int _tmain(int argc, _TCHAR* argv[])
   std::cout << "AFTER CAM ADD" << std::endl;
 
   //setup cv windows
-  std::string wn0 = "cam0 | scene";
+/*  std::string wn0 = "cam0 | scene";
   std::string wn1 = "cam1 | left";
   std::string wn2 = "cam2 | right";
   cv::namedWindow(wn0, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
@@ -140,6 +142,10 @@ int _tmain(int argc, _TCHAR* argv[])
   cv::moveWindow(wn2, 10, 500);
   cv::moveWindow(wn1, 650, 500);
   cv::moveWindow(wn0, 330, 50);
+*/
+
+  OOGUI* oogui = new OOGUI();
+  oogui->Initialize();
 
   bool stopThisNonsense = false;
   bool displayStats = true;
@@ -168,9 +174,17 @@ int _tmain(int argc, _TCHAR* argv[])
 	  //here, read tracking results and draw on overlays
 	  //the tracker should not modify the frame
 
-	  cv::imshow(wn1, *eyeImgL);
-	  cv::imshow(wn2, *eyeImgR);
-	  cv::imshow(wn0, *sceneImg);
+	//  cv::imshow(wn1, *eyeImgL);
+	//  cv::imshow(wn2, *eyeImgR);
+	//  cv::imshow(wn0, *sceneImg);
+
+	  std::vector<cv::Mat> imgs;
+	  imgs.push_back(eyeImgR->getMat(cv::ACCESS_READ));
+	  imgs.push_back(eyeImgL->getMat(cv::ACCESS_READ));
+	  imgs.push_back(sceneImg->getMat(cv::ACCESS_READ));
+	  imgs.push_back(sceneImg->getMat(cv::ACCESS_READ));
+
+	  oogui->pushFrame(imgs);
 
 	  counter++;
 
@@ -183,7 +197,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	//std::cout << "FRAME DRAW: " << duration.count() << std::endl;
 
 	//TODO sync this to 30Hz -> wait for 30 - measured_processing_time
-	int key = cv::waitKey(1);
+/*	int key = cv::waitKey(1);
 
 	switch (key){
 	  //see http://www.expandinghead.net/keycode.html
@@ -195,15 +209,19 @@ int _tmain(int argc, _TCHAR* argv[])
 	  break;
 	case 110: //n
 	  grabber->grabone();
-	  /*			case 49: //1
-				grabber->setFrameDurationTest(--framedur);
-				break;
-				case 50: //2
-				grabber->setFrameDurationTest(++framedur);
-				break;
-	  */
+	  	//		case 49: //1
+				//grabber->setFrameDurationTest(--framedur);
+				//break;
+				//case 50: //2
+				//grabber->setFrameDurationTest(++framedur);
+				//break;
+	  
 	}
-      }
+	*/
+
+	oogui->update();
+
+	}
     catch (int e) {
       std::cout << "error in main: " << e << std::endl;
     }

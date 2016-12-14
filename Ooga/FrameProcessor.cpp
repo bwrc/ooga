@@ -412,6 +412,7 @@ void FrameProcessor::Process()
 				std::cout << "FRAME_NR: " << frame->getNumber() << std::endl;
 
 				cv::UMat* sceneImage = frame->getImg(FrameSrc::SCENE);
+				cv::flip((*sceneImage), (*sceneImage), -1);
 				// Draw the pog in the scene image. Adjust its size according to the glint fit score (of the "last" camera!).
 				cv::circle(*sceneImage, pog_scam, 35 * (1 - best_score) + 5, cv::Scalar(0, 0, 250), 7, 8);
 
