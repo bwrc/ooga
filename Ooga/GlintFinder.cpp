@@ -3,7 +3,7 @@
 //#define DEBUGFILE
 
 #define N_LEDS 6
-#define N_GLINT_CANDIDATES 6
+#define N_GLINT_CANDIDATES 2
 
 // TODO: Give N_glint_candidates as input parameter! t: Miikax
 
