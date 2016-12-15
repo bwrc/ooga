@@ -175,6 +175,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	  counter++;
 	  //std::cout << counter << std::endl;
+	  //if (counter==10) exit(8);
 
 	  //delete myframe;
 	  myframe.reset();

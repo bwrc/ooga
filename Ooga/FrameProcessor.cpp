@@ -31,9 +31,12 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 	etLeft->InitAndConfigure( FrameSrc::EYE_L, CM_fn_left, glintmodel_fn, K9_matrix_fn );
 	etRight->InitAndConfigure(FrameSrc::EYE_R, CM_fn_right, glintmodel_fn, K9_matrix_fn );
 
-	//cv::FileStorage fs(K9_matrix_fn, cv::FileStorage::READ);
-	// fs["K9_left"] >> K9_left;  // nää oli turhia (ellei sitten kalibroinnissa) t: Miika
-	// fs["K9_right"] >> K9_right;
+	cv::FileStorage fs(K9_matrix_fn, cv::FileStorage::READ);
+	fs["K9_left"] >> K9_left;
+	fs["K9_right"] >> K9_right;
+
+	K9_left.convertTo(K9_left, CV_64F);
+	K9_right.convertTo(K9_right, CV_64F);
 
 	//st = new TSceneTracker();
 	//st->SetCamFeedSource(FrameSrc::SCENE);
@@ -217,8 +220,9 @@ void FrameProcessor::Process()
 	  thr_eL.join();
 	  //thr_eR.join();
 
-	  //Now we have results for both eyes --> combine
-	  theta_mean = (thetaL + thetaR) / 2.0;
+	  ///// Now we have results for both eyes --> combine
+
+	  theta_mean = (thetaL + thetaR) / 2.0;  // self-explanatory
 
 	  //transform 3D features from left to right camera coordinates for combining
 	  Eigen::VectorXd cc_l2r(4), Cc3d_aug(4);
@@ -228,6 +232,7 @@ void FrameProcessor::Process()
 	  resL->corneaCenter3D.x = cc_l2r(0);
 	  resL->corneaCenter3D.y = cc_l2r(1);
 	  resL->corneaCenter3D.z = cc_l2r(2);
+
 	  Eigen::VectorXd pc_l2r(4), Pc3d_aug(4); // (3d pupil centers are actually just for calibration)
 	  Pc3d_aug << resL->pupilCenter3D.x, resL->pupilCenter3D.y, resL->pupilCenter3D.z, 1;
 	  pc_l2r = A_l2r * Pc3d_aug;
@@ -237,6 +242,26 @@ void FrameProcessor::Process()
 
 	  cv::Point3d gazeVectorR;
 	  cv::Point3d gazeVectorL;
+	  cv::Point3d opticalVectorR;
+	  cv::Point3d opticalVectorL;
+
+
+	  // Multiply both eye's optical vectors by K matrix to get the gaze vector
+	  opticalVectorL = (resL->pupilCenter3D - resL->corneaCenter3D) / double(cv::norm(resL->pupilCenter3D - resL->corneaCenter3D));
+	  cv::Mat opticalVectorL_mat(opticalVectorL);
+	  cv::Mat K9_times_optical_vector_mat_L = K9_left * opticalVectorL_mat;
+	  cv::Point3d K9_times_optical_vector_point_L(K9_times_optical_vector_mat_L);
+	  gazeVectorL = K9_times_optical_vector_point_L / cv::norm(K9_times_optical_vector_point_L);
+
+	  opticalVectorR = (resR->pupilCenter3D - resR->corneaCenter3D) / double(cv::norm(resR->pupilCenter3D - resR->corneaCenter3D));
+	  cv::Mat opticalVectorR_mat(opticalVectorR);
+	  cv::Mat K9_times_optical_vector_mat_R = K9_right * opticalVectorR_mat;
+	  cv::Point3d K9_times_optical_vector_point_R(K9_times_optical_vector_mat_R);//.at<float>(0), K9_times_optical_vector_mat_R.at<float>(1), K9_times_optical_vector_mat_R.at<float>(2));
+	  gazeVectorR = K9_times_optical_vector_point_R / cv::norm(K9_times_optical_vector_point_R);
+
+
+	  // K9_times_optical_vector_L = A_l2r * K9_times_optical_vector_aug_L;
+	  // gazeVectorL = K9_times_optical_vector_point_L / norm(K9_times_optical_vector_point_L);
 
 	  bool USE_KAPPA_CORRECTION = false;  // DON'T USE "KAPPA_CORRECTION", IT WAS JUST A TEST!
 
@@ -294,11 +319,13 @@ void FrameProcessor::Process()
 	    using_both_eyes = 0;
 	    if (resR->score >= resL->score) { // added equality
 	      best_eye_ind = 0; best_score = resR->score;
-	      gazePoint_ecam = resR->corneaCenter3D + gaze_dist * resR->gazeDirectionVector;
+	      //gazePoint_ecam = resR->corneaCenter3D + gaze_dist * resR->gazeDirectionVector;  t: Miika
+	      gazePoint_ecam = resR->corneaCenter3D + gaze_dist * gazeVectorR;
 	    }
 	    else{
 	      best_eye_ind = 1; best_score = resL->score;
-	      gazePoint_ecam = resL->corneaCenter3D + gaze_dist * resL->gazeDirectionVector;
+	      //gazePoint_ecam = resL->corneaCenter3D + gaze_dist * resL->gazeDirectionVector;
+	      gazePoint_ecam = resL->corneaCenter3D + gaze_dist * gazeVectorL;
 	    }
 	  }
 
@@ -353,8 +380,10 @@ void FrameProcessor::Process()
 
 	    cv::Point3d cr = resR->corneaCenter3D; // Right cornea center
 	    cv::Point3d cl = resL->corneaCenter3D;  // Left cornea center
-	    cv::Point3d gr = resR->gazeDirectionVector;// / norm(resR->gazeDirectionVector);  // Right gaze vector (must be normalized) (it was t: Miika)
-	    cv::Point3d gl = resL->gazeDirectionVector;// / norm(resL->gazeDirectionVector);   // Left gaze vector (must be normalized)
+	    // cv::Point3d gr = resR->gazeDirectionVector;// / norm(resR->gazeDirectionVector);  // Right gaze vector (must be normalized) (it was t: Miika)
+	    // cv::Point3d gl = resL->gazeDirectionVector;// / norm(resL->gazeDirectionVector);   // Left gaze vector (must be normalized)
+	    cv::Point3d gr = gazeVectorR;
+	    cv::Point3d gl = gazeVectorL;
 
 	    // compute the gaze point as the 3d point with smallest square distance to the two gaze vectors. Results in noisy estimates, especially when looking further away.
 	    // double gaze_dist_left2 = 1 / (1 - gr.dot(gl) * gl.dot(gr)) * (cr.dot(gl) - cl.dot(gl) + gr.dot(gl)*cl.dot(gr) - gr.dot(gl) * cr.dot(gr));  // "old" method, noisy...
@@ -369,8 +398,6 @@ void FrameProcessor::Process()
 	    //TODO: this is now in right eye coordinates, right? -> use of A_r2s below
 	    gazePoint_ecam = (cv::Point3d(cl + gaze_dist_left*gl) + cv::Point3d(cr + gaze_dist_right*gr)) / 2;  // The computed gaze point is in the right (user's right) eye cam coordinates
 	  }
-
-	  //else { 	    std::cout << " NOT using both eyes " << std::endl; }  // voi poistaa.... t: Miika
 
 
 	  double pog_x, pog_y;
@@ -437,7 +464,7 @@ void FrameProcessor::Process()
 	  // Draw the pog in the scene image. Adjust its size according to the glint fit score (of the "last" camera!).
 	  cv::circle(*sceneImage, pog_scam, 35 * (1 - best_score) + 5, cv::Scalar(0, 0, 250), 7, 8);
 	  
-	  if (blinking) {
+	  if (blinking) {  // TODO: Why it never glinks? 
 	    cv::putText(*sceneImage, "BLINK ", cv::Point2d(100, 300), CV_FONT_HERSHEY_PLAIN, 10, CV_RGB(250, 0, 100), 5);
 	  }
 	  if (!using_both_eyes) { // print text, if only other eye is used?

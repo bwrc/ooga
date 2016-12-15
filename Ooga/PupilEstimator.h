@@ -41,8 +41,8 @@ public:
 	std::vector<cv::Point2f> pupil_edge;
 	double min_val, max_val;
 	cv::Point min_loc, max_loc;
-	float delta_x = 50;  // zoom area (horizontal) where to search the pupil edge around the pupil center
-	float delta_y = 50;  // zoom area (vertical) where to search the pupil edge around the pupil center
+	float delta_x = 70;  // zoom area (horizontal) where to search the pupil edge around the pupil center
+	float delta_y = 70;  // zoom area (vertical) where to search the pupil edge around the pupil center
 	float x_min, x_max, y_min, y_max;
 
 	// these are here for the iteration part

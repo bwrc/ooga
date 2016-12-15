@@ -21,6 +21,7 @@ void PupilEstimator::Initialize()
 //cv::RotatedRect PupilEstimator::getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_center, cv::Mat pupil_kernel, cv::Mat pupil_element)
 cv::RotatedRect PupilEstimator::getPupilEllipse(cv::Mat eyeImage_opened, cv::Point2d pupil_center, cv::Mat pupil_kernel, cv::Mat pupil_element, bool pupil_iterate, float pupil_beta)
 {
+  // TODO: Last two argument are useless t: Miika
 
   ITERATE = pupil_iterate;
 
@@ -66,7 +67,7 @@ cv::RotatedRect PupilEstimator::getPupilEllipse(cv::Mat eyeImage_opened, cv::Poi
     // Get the connected components of the binary image
     eyeImage_binary.convertTo(eyeImage_binary_8bit, CV_8UC1);
   */
-  int thold = floor(0.15 * 255);  // TODO: as input parameter (read it from file)
+  int thold = floor(0.3 * 255);  // TODO: as input parameter (read it from file)  (thold used to be 0.15)
   cv::normalize(eyeImage_sum, eyeImage_sum_scaled, 0, 255, cv::NORM_MINMAX, -1);
   cv::threshold(eyeImage_sum_scaled, eyeImage_binary, thold, 255, cv::THRESH_BINARY_INV);
   //the replacement for the commented bit above ends here

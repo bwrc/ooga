@@ -96,7 +96,7 @@ private:
 //	double eye_intr[9];// , eye_intr2[9];
 //	double eye_dist[5];// , eye_dist2[5];
 
-	cv::Mat K9_matrix = cv::Mat(3, 3, CV_32F);
+	cv::Mat K9_matrix; // = cv::Mat(3, 3, CV_64F);  Miika
 	cv::Mat A_rot;
 	cv::Mat a_tr;
 	cv::Mat invA_rot;

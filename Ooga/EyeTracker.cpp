@@ -113,8 +113,6 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 		MU_Y[i] = MU_Y_mat.at<float>(0, i);
 	}
 
-	//std::cout << MU_X_mat << std::endl; exit(8);  // poista
-
 	cv::FileStorage fs("calibration/parameters.yaml", cv::FileStorage::READ);
 	fs["glint_beta"] >> glint_beta;
 	fs["glint_reg_coef"] >> glint_reg_coef;
@@ -155,6 +153,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	}
 	free(buffer_CM);
 
+	// EI lueta K9 tässä?  t: Miika
 	cv::FileStorage k9fs(K9_matrix_fn, cv::FileStorage::READ);
 	if (myEye == FrameSrc::EYE_L) k9fs["K9_left"] >> K9_matrix;
 	else k9fs["K9_right"] >> K9_matrix;
@@ -262,7 +261,7 @@ void EyeTracker::setCropWindowSize(int xmin, int ymin, int width, int height)
 void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Point3d &pupilCenter3D, cv::Point3d &corneaCenter3D, double &theta)
 {
 
-  // Miksi tämä "palauttaa" &pupilCenter3D ja &corneaCenter3D, kun ne kuitenkin ovat trackres:n tietueita? t: Miika
+  // Miksi tämä "palauttaa" &pupilCenter3D ja &corneaCenter3D, kun ne kuitenkin ovat trackres -tietueen kenttiä? t: Miika
 
 	pt->start();
 
@@ -371,11 +370,10 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 	cv::Point2d pupilEllipsePoints[4];  // There are four endpoints in an ellipse's axes
 	getPupilEllipsePoints(pupilEllipse, pupilEllipsePoints_prev_eyecam, double(theta), &pupilEllipsePoints[0]);
 
+	
 	for (int i=0; i<4; i++)  {  // Loop the four endpoints of the ellipse's axes
 	  pupilEllipsePoints_prev_eyecam[i] = pupilEllipsePoints[i];
 	}
-
-
 
 	for (int i = 0; i < 4; i++) {
 	  pupilEllipsePoints[i].x = pupilEllipsePoints[i].x + cropminX;
@@ -400,16 +398,13 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 	std::vector<Eigen::Vector3d, Eigen::aligned_allocator<Eigen::Vector3d> > glint_pos_sub;
 	std::vector<double> guesses_sub;
 	float glint_score_threshold = 0.1; //0.3;
-	cv::Scalar glint_colors[6];
 
 	for (int i = 0; i < 6; i++) {
 	  if (glint_scores[i] > glint_score_threshold) {
-	    glint_colors[i] = cv::Scalar(0, 250, 0);
 	    glint_pos_sub.push_back(glint_pos[i]);
 	    led_pos_sub.push_back(led_pos[i]);
 	    guesses_sub.push_back(gx_guess);
 	  }
-	  else { glint_colors[i] = cv::Scalar(0, 0, 250); }
 	}
 
 	if (glint_pos_sub.size() < 2) {
@@ -424,14 +419,14 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 	Pc3d = computePupilCenter3d(pupilEllipsePoints3d, Cc3d);
 
 	/// Compute the pupil-corneal distance vector ("gaze vector") and correct it with K9
-	cv::Point3f gaze_dir = (Pc3d - Cc3d) / float(norm(Pc3d - Cc3d));
-	cv::Mat gaze_dir_mat(gaze_dir);
-	cv::Mat K9_times_gaze_dir_mat;
+	cv::Point3f optical_vector = (Pc3d - Cc3d) / float(cv::norm(Pc3d - Cc3d));
+	cv::Mat optical_vector_mat(optical_vector);
+	cv::Mat K9_times_optical_vector_mat;
 
-	K9_times_gaze_dir_mat = K9_matrix * gaze_dir_mat;
+	K9_times_optical_vector_mat = K9_matrix * optical_vector_mat;  // turha? t: Miika
 
-	cv::Point3d K9_times_gaze_dir_point(K9_times_gaze_dir_mat.at<float>(0), K9_times_gaze_dir_mat.at<float>(1), K9_times_gaze_dir_mat.at<float>(2));
-	//cv::Point3d K9_times_gaze_dir_point(K9_times_gaze_dir_mat.at<double>(0), K9_times_gaze_dir_mat.at<double>(1), K9_times_gaze_dir_mat.at<double>(2));
+	cv::Point3d K9_times_optical_vector_point(K9_times_optical_vector_mat.at<float>(0), K9_times_optical_vector_mat.at<float>(1), K9_times_optical_vector_mat.at<float>(2));
+	//cv::Point3d K9_times_optical_vector_point(K9_times_optical_vector_mat.at<double>(0), K9_times_optical_vector_mat.at<double>(1), K9_times_optical_vector_mat.at<double>(2));
 
 	//copy results to tracking results
 	trackres->pupilCenter2D = cv::Point2d(pupil_center.x + cropminX, pupil_center.y + cropminY);
@@ -445,7 +440,8 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 
 	trackres->glintPoints = glintPoints;
 	trackres->corneaCenter3D = Cc3d;
-	trackres->gazeDirectionVector = K9_times_gaze_dir_point / cv::norm(K9_times_gaze_dir_point);
+	//trackres->gazeDirectionVector = K9_times_optical_vector_point / cv::norm(K9_times_optical_vector_point);  t: Miika
+	//trackres->K9_times_optical_vector_point = K9_times_optical_vector_point;  kokeilu, poista...
 	trackres->score = score;
 
 	//TODO: insert tracking results to frame, visualize in main thread
