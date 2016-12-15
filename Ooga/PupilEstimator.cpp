@@ -108,7 +108,7 @@ cv::RotatedRect PupilEstimator::getPupilEllipse(cv::Mat eyeImage_opened, cv::Poi
 
     pupilEllipse.angle = (270-pupilEllipse.angle) *CV_PI/180.0;
 
-    return pupilEllipse;
+    return pupilEllipse;  // modified t: Miika
     //return cv::RotatedRect(cv::fitEllipse(pupil_contour));
 
     //TODO: this results in an assertion failure _block_type_is_valid(pHead->nBlockUse)

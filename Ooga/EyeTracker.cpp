@@ -367,26 +367,15 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 	pupilEllipse = pupilestimator->getPupilEllipse(opened.getMat(cv::ACCESS_READ), pupil_center, pupil_kernel2, pupil_element, pupil_iterate, pupil_beta);
 	//pupilestimator->getPupilEllipse(opened.getMat(cv::ACCESS_READ), pupil_center, pupil_kernel2, pupil_element, pupil_iterate, pupil_beta, *pupilEllipse);
 
-	//std::cout << "pupilEllipse.center.x:  " << pupilEllipse.center.x << std::endl; //poista
-
 	//TODO move this to pupilestimator for cleansiness?
-	pupilEllipsePoints = getPupilEllipsePoints(pupilEllipse, pupilEllipsePoints_prev_eyecam, double(theta));
+	cv::Point2d pupilEllipsePoints[4];
+	getPupilEllipsePoints(pupilEllipse, pupilEllipsePoints_prev_eyecam, double(theta), &pupilEllipsePoints[0]);
 
-	if (0 & pupilEllipsePoints[0].x > 200) {  // poista!
-	  std::cout << "pupil_center.x:  " << pupil_center.x << std::endl;
-	  std::cout << "pupilEllipse:  " << pupilEllipse.center.x << "  " << pupilEllipse.size.width << "  " << pupilEllipse.size.height << std::endl; //poista
-	  std::cout << "pupilEllipsePoints[0].x:  " <<  pupilEllipsePoints[0].x << std::endl;
-	  std::cout << "pupilEllipsePoints_prev_eyecam[0].x:  " << pupilEllipsePoints_prev_eyecam[0].x << std::endl;
-	  std::cout << std::endl;
-	}
-
-	for (int i=0; i<4; i++)  {  // There are four endpoint in an ellipse axes; loop these
+	for (int i=0; i<4; i++)  {  // There are four endpoints in an ellipse axes; loop these
 	  pupilEllipsePoints_prev_eyecam[i] = pupilEllipsePoints[i];
 	}
 
 
-
-	//delete pupilEllipse;
 
 	for (int i = 0; i < 4; i++) {
 	  pupilEllipsePoints[i].x = pupilEllipsePoints[i].x + cropminX;

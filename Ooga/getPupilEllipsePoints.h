@@ -3,6 +3,6 @@
 
 #include <opencv2/opencv.hpp>
 
-cv::Point2d* getPupilEllipsePoints(cv::RotatedRect pupilEllipse, cv::Point2d *pupilEllipsePoints_prev, double theta);
+void getPupilEllipsePoints(cv::RotatedRect pupilEllipse, cv::Point2d *pupilEllipsePoints_prev, double theta, cv::Point2d* pupilEllipsePoints);
 
 #endif
