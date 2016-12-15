@@ -368,10 +368,10 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 	//pupilestimator->getPupilEllipse(opened.getMat(cv::ACCESS_READ), pupil_center, pupil_kernel2, pupil_element, pupil_iterate, pupil_beta, *pupilEllipse);
 
 	//TODO move this to pupilestimator for cleansiness?
-	cv::Point2d pupilEllipsePoints[4];
+	cv::Point2d pupilEllipsePoints[4];  // There are four endpoints in an ellipse's axes
 	getPupilEllipsePoints(pupilEllipse, pupilEllipsePoints_prev_eyecam, double(theta), &pupilEllipsePoints[0]);
 
-	for (int i=0; i<4; i++)  {  // There are four endpoints in an ellipse axes; loop these
+	for (int i=0; i<4; i++)  {  // Loop the four endpoints of the ellipse's axes
 	  pupilEllipsePoints_prev_eyecam[i] = pupilEllipsePoints[i];
 	}
 

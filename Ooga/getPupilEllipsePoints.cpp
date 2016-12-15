@@ -10,11 +10,7 @@ void getPupilEllipsePoints(cv::RotatedRect pupilEllipse, cv::Point2d pupilEllips
   // PupilEllipse has zero angle with the box in 'vertical' orientation, with angles growing anti-clockwise (i.e., the "normal" angle convention).
   // Also, size.height should be the larger dimension, i.e., size.height > size.width should hold when returned by fitEllipse.
 
-  //static cv::Point2d pupilEllipsePoints[4];
-  //cv::Point2d pupilEllipsePoints[4];   // poistin 'static' t: Miika
   cv::Point2d pupilEllipsePoints_meas[4];
-
-  //std::cout << pupilEllipse.angle << " ---> " << cos(pupilEllipse.angle) << "  " << std::cos(pupilEllipse.angle) << std::endl; //poista
 
   pupilEllipsePoints_meas[0].x = double(pupilEllipse.center.x + cos(pupilEllipse.angle) * pupilEllipse.size.height/2);
   pupilEllipsePoints_meas[0].y = double(pupilEllipse.center.y - sin(pupilEllipse.angle) * pupilEllipse.size.height/2);
@@ -25,7 +21,7 @@ void getPupilEllipsePoints(cv::RotatedRect pupilEllipse, cv::Point2d pupilEllips
   pupilEllipsePoints_meas[3].x = double(pupilEllipse.center.x - sin(pupilEllipse.angle) * pupilEllipse.size.width/2);
   pupilEllipsePoints_meas[3].y = double(pupilEllipse.center.y - cos(pupilEllipse.angle) * pupilEllipse.size.width/2);
 
-  if (0) {      // Swap axis end points (Yes, do it)  POISTA 0!
+  if (1) {      // Swap axis end points (Yes, do it)
     for (int ind=0; ind<4; ind=ind+2) {
       if (NORM2(pupilEllipsePoints_meas[ind] , pupilEllipsePoints_prev[ind]) > NORM2(pupilEllipsePoints_meas[ind] , pupilEllipsePoints_prev[ind+1])) {
 	cv::Point2d tmp = pupilEllipsePoints_meas[ind];
@@ -38,14 +34,10 @@ void getPupilEllipsePoints(cv::RotatedRect pupilEllipse, cv::Point2d pupilEllips
 
   theta = cv::max(theta, 0.2);  // Replace the troublesome filtering in the end of this function with this simple threshold for theta (Miika 22.9.2016)
 
-  theta = 1.0; // POISTA!
-
   for (int i=0; i<4; i++)  {
     pupilEllipsePoints[i] = cv::Point2d(theta * pupilEllipsePoints_meas[i].x + (1-theta) * pupilEllipsePoints_prev[i].x, \
 					theta * pupilEllipsePoints_meas[i].y + (1-theta) * pupilEllipsePoints_prev[i].y);
   }
-
-  //std::cout << pupilEllipsePoints_meas[0].x << " ---> " << pupilEllipsePoints[0].x << std::endl;
 
   // if (1) {  // Skip the additional filtering and return here? (It's unnecessary now with the thresholded theta; Miika 22.9.2016)
   //   return; }
