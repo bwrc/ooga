@@ -115,6 +115,7 @@ private:
 	int active_view = 0;
 	// Do redraw?
 	bool do_redraw = 1;
+	bool redraws[4]; //for each window part
 
 	bool loadedAll = false;
 

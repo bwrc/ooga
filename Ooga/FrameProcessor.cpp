@@ -380,6 +380,7 @@ void FrameProcessor::Process()
 				bool USE_KALMAN = 1;  // TODO: define elsewhere
 
 				cv::UMat* sceneImage = frame->getImg(FrameSrc::SCENE);  // moved this here t: Miika
+				//flipping now controlled in the config
 				//cv::flip(*sceneImage, *sceneImage, 1);    // The scene camera is upside down (t: Miika)
 				//cv::flip(*sceneImage, *sceneImage, 0);
 

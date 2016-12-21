@@ -1,11 +1,9 @@
 <?xml version="1.0"?>
 <settings>
 
-	<!---------------------------------------------------------------------->
 	<!-- registration can be monocular or binocular -->
 	<registration type="binocular"/>
 
-	<!---------------------------------------------------------------------->
 	<!-- 
 	list cameras here, tags: <eye> or <scene>
 		parameters: loc: left, right
@@ -13,32 +11,38 @@
 		subtags: 
 			<num> : cam feed number
 			<file>: file name (with path)
-			<cal> : camera calibration file
 	-->
 	<cameras>
 		<eye loc="right" type="cam">
 			<num>1</num>
-			<file>videos/eyevideo.avi</file>
-			<cal>eyecal.xml</cal>
+			<file>videos/sg01_cam02.mjpg</file>
 		</eye>
 		<eye loc="left" type="file">
 			<num>1</num>
-			<file>videos/eyevideo.avi</file>
-			<cal>eyecal.xml</cal>
+			<file>videos/sg01_cam03.mjpg</file>
 		</eye>
-		<scene type="cam">
+		<scene type="file">
 			<num>2</num>
-			<file>videos/scenevideo.avi</file>
-			<cal>scenecal.xml</cal>
+			<file>videos/sg01_cam01.mjpg</file>
 		</scene>
 	</cameras>
 
-	<!---------------------------------------------------------------------->
+	<calibration>
+		<camerarig filename="../calibration/camerarig.yaml"/>
+		<cam_lefteye filename="../calibration/eye_cam_left.yaml"/>
+		<cam_righteye filename="../calibration/eye_cam_right.yaml"/>
+		<K9 filename="../calibration/K9.yaml"/>
+		<glintmodel filename="../calibration/glint_model.yaml"/>
+		<CM_left filename="../calibration/file_CM_left"/>
+		<CM_right filename="../calibration/file_CM_right"/>
+		<parameters filename="../calibration/parameters.yaml"/>
+	</calibration>
+	
 	<!-- 
 	how to handle the results:
 		<savevideos>1 = yes, 0 = no</savevideos>
 		<videofolder>resvideos/</videofolder>
-		<output>txt</output> <!-- what kind of formats can we use here?
+		<output>txt</output> 
 		<streamdata>1 = yes, 0 = no</streamdata>
 		<LSL streamname="insert stream name" streamtype="VOG"/>
 	-->
@@ -49,7 +53,5 @@
 		<streamdata>0</streamdata>
 		<LSL streamname="SG_stream" streamtype="VOG"/>
 	</results>
-
-	<!---------------------------------------------------------------------->
 
 </settings>

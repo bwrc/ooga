@@ -222,15 +222,31 @@ void OOGUI::drawAllViews()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
-	// todo: should the enumeration be 0-3?
-	// Upper left view (TOP VIEW)
-	drawViewPort(1, 0, height / 2, width / 2, height / 2);
-	//Upper right
-	drawViewPort(2, width / 2, height / 2, width / 2, height / 2);
-	// Lower left
-	drawViewPort(3, 0, 0, width / 2, height / 2);
-	//Lower right
-	drawViewPort(4, width / 2, 0, width / 2, height / 2);
+	int layout = 1;
+
+	switch (layout){
+	case 0: //default 4x4
+		// Upper left view (TOP VIEW)
+		drawViewPort(1, 0, height / 2, width / 2, height / 2);
+		//Upper right
+		drawViewPort(2, width / 2, height / 2, width / 2, height / 2);
+		// Lower left
+		drawViewPort(3, 0, 0, width / 2, height / 2);
+		//Lower right
+		drawViewPort(4, width / 2, 0, width / 2, height / 2);
+		break;
+	case 1:
+		int h_limit = 3.0 / 4.0 * height;
+		// left eye
+		drawViewPort(1, 0, h_limit, width/3, height/4);
+		//right eye
+		drawViewPort(2, width / 3, h_limit, width / 3, height / 4);
+		// scene
+		drawViewPort(3, 0, 0, width, h_limit);
+		//stats
+		drawViewPort(4, width *2/3, h_limit, width / 3, height / 4);
+		break;
+	}
 
 	// Disable depth test
 	glDisable(GL_DEPTH_TEST);
@@ -466,14 +482,14 @@ void OOGUI::pushFrame(TBinocularFrame &frame) {
 		textureid[0] = matToTexture(true, 0, (frame.getImg(FrameSrc::EYE_R))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
 		textureid[1] = matToTexture(true, 0, (frame.getImg(FrameSrc::EYE_L))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
 		textureid[2] = matToTexture(true, 0, (frame.getImg(FrameSrc::SCENE))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
-		textureid[3] = matToTexture(true, 0, (frame.getImg(FrameSrc::SCENE))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
-		//textureid[3] = matToTexture(true, 0, frame.at(3), GL_NEAREST, GL_NEAREST, GL_CLAMP);
+		//generate an empty mat for the stats window as the frame only has three
+		textureid[3] = matToTexture(true, 0, cv::Mat(cv::Size(640, 480), CV_8UC3), GL_NEAREST, GL_NEAREST, GL_CLAMP);
 	}
 	else {
 		matToTexture(false, textureid[0], (frame.getImg(FrameSrc::EYE_R))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
 		matToTexture(false, textureid[1], (frame.getImg(FrameSrc::EYE_L))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
 		matToTexture(false, textureid[2], (frame.getImg(FrameSrc::SCENE))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
-		matToTexture(false, textureid[3], (frame.getImg(FrameSrc::SCENE))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
+		//matToTexture(false, textureid[3], (frame.getImg(FrameSrc::SCENE))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
 	}
 	do_redraw = true;
 }

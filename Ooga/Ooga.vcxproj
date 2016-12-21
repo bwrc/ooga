@@ -104,6 +104,7 @@
     <ClInclude Include="getPupilEllipsePoints.h" />
     <ClInclude Include="GlintFinder.h" />
     <ClInclude Include="kalmanFilterGazePoint.h" />
+    <ClInclude Include="oogaConstants.h" />
     <ClInclude Include="PerformanceTimer.h" />
     <ClInclude Include="PupilEstimator.h" />
     <ClInclude Include="Settings.h" />
@@ -123,7 +124,6 @@
     <ClCompile Include="FrameProcessor.cpp" />
     <ClCompile Include="FrameRateLimiter.cpp" />
     <ClCompile Include="getPupilCenter.cpp" />
-    <ClCompile Include="getPupilEllipse.cpp" />
     <ClCompile Include="getPupilEllipsePoints.cpp" />
     <ClCompile Include="GlintFinder.cpp" />
     <ClCompile Include="kalmanFilterGazePoint.cpp" />
