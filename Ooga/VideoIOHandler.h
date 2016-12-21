@@ -35,7 +35,7 @@ public:
 	*	\param cap a pointer to a VideoCapture from the calling entity
 	*	\return the number of the camera assigned (needed for at least the video saver)
 	*/
-	int AddCamera(FrameSrc f, cv::VideoCapture *cap);
+	int AddCamera(FrameSrc f, cv::VideoCapture *cap, int flip);
 
 	/** GrabFramesInThread()
 	* grabs a frame from all of the cameras as synced as possible
@@ -73,6 +73,7 @@ private:
 	BalancingQueue<std::shared_ptr<TBinocularFrame>>* procRWQ;
 
 	std::vector<cv::VideoCapture *> caps;				// pointers to video capture devices
+	std::vector<int> flips; // flipping of respective caps
 
 	int64 totalGrabbed;
 	//boost::posix_time::ptime zerotime;

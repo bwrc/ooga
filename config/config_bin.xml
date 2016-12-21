@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<settings>
+
+	<!-- 
+	list cameras here, <eyeleft>, <eyeright> or <scene>
+	    count = number of cameras
+		type: cam, file
+		flip: 0 = none, 
+		      1 = vertical, 
+			  2 = horizontal, 
+			  3 = both
+		subtags: 
+			<num> : cam feed number (USB)
+			<file>: file name to source video (with relative path)
+	-->
+	<cameras count="3">
+		<eyeleft type="video">
+			<num>1</num>
+			<file>../videos/sg01_cam2.mjpg</file>
+			<flip>1</flip>
+		</eyeleft>
+		<eyeright type="video">
+			<num>2</num>
+			<file>../videos/sg01_cam3.mjpg</file>
+			<flip>2</flip>
+		</eyeleft>
+		<scene type="cam">
+			<num>0</num>
+			<file>../videos/sg01_cam1.mjpg</file>
+			<flip>3</flip>			
+		</scene>
+	</cameras>
+	<savefiles>true</savefiles>
+		
+	<calibration>
+		<camerarig filename="../calibration/camerarig.yaml"/>
+		<cam_lefteye filename="../calibration/eye_cam_left.yaml"/>
+		<cam_righteye filename="../calibration/eye_cam_right.yaml"/>
+		<K9 filename="../calibration/K9.yaml"/>
+		<glintmodel filename="../calibration/glint_model.yaml"/>
+		<CM_left filename="../calibration/file_CM_left"/>
+		<CM_right filename="../calibration/file_CM_right"/>
+		<parameters filename="../calibration/parameters.yaml"/>
+	</calibration>
+
+	<!-- 
+	how to handle the results:
+		<savevideos>1 = yes, 0 = no</savevideos>
+		<videofolder>resvideos/</videofolder>
+		<output>txt</output> 
+		<streamdata>1 = yes, 0 = no</streamdata>
+		<LSL streamname="insert stream name" streamtype="VOG"/>
+	-->
+	<results>
+		<savevideos>0</savevideos>
+		<videofolder>resvideos/</videofolder>
+		<output>txt</output>
+		<streamdata>0</streamdata>
+		<LSL streamname="SG_stream" streamtype="VOG"/>
+	</results>
+	
+</settings>

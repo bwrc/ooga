@@ -23,6 +23,8 @@
 #include <iostream>
 #include <opencv2/imgproc.hpp>
 
+#include "../Ooga/FrameBinocular.h"
+#include "../Ooga/oogaConstants.h"
 
 class OOGUI
 {
@@ -32,6 +34,7 @@ public:
 
 	bool Initialize();
 	void pushFrame(std::vector<cv::Mat> &frame);
+	void pushFrame(TBinocularFrame &frame);
 	//void pushFrame(cv::Mat frame);
 	void shutDown();
 	void setSize(int w, int h);
@@ -39,6 +42,10 @@ public:
 	void drawAllViews();
 
 	void drawViewPort(int num, int x, int y, int width, int height);
+	void SetCallBackFunction(std::function<void(RunningModes mode, bool value)> callback);
+
+	void RenderState(int viewport);
+
 
 private:
 
@@ -54,6 +61,7 @@ private:
 	GLuint fragmentShader;
 	GLuint vertexShader;
 
+	std::function<void(RunningModes, bool)> modeCallBack;
 
 	std::vector<std::array<float, 3>> quadpoints;
 	std::vector<std::array<int, 3>> faces;
@@ -110,7 +118,12 @@ private:
 
 	bool loadedAll = false;
 
+	bool getCalibrationSamples = false;
+
+	GLFWcursor *cursor_normal, *cursor_crosshair;
+
 };
+
 
 /*class OOGUI_OGL
 {

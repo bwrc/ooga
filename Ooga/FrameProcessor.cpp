@@ -1,6 +1,7 @@
 #include "FrameProcessor.h"
 
 #include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/eigen.hpp> //eigen conversion
 #include <iostream>
 
 #include <thread>
@@ -13,7 +14,8 @@
 //FrameProcessor::FrameProcessor(concurrent_queue<std::shared_ptr<TBinocularFrame>>* in,
 //	concurrent_queue<std::shared_ptr<TBinocularFrame>>* out)
 FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>* in,
-	BalancingQueue<std::shared_ptr<TBinocularFrame>>* out)
+	BalancingQueue<std::shared_ptr<TBinocularFrame>>* out,
+	TSettings* settings)
 {
 	this->qIn = in;
 	this->qOut = out;
@@ -22,69 +24,41 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 	etRight = new EyeTracker();
 
 	//TODO Move hard-coded files to settings
-	std::string CM_fn_left = "../calibration/file_CM_left";
-	std::string CM_fn_right = "../calibration/file_CM_right";
-	std::string glintmodel_fn = "../calibration/glint_model.yaml";
-	std::string K9_matrix_fn = "../calibration/K9.yaml";
-	std::string parameters_fn = "../calibration/parameters.yaml";
+	//std::string CM_fn_left = "../calibration/file_CM_left";
+	//std::string CM_fn_right = "../calibration/file_CM_right";
+	//std::string glintmodel_fn = "../calibration/glint_model.yaml";
+	//std::string K9_matrix_fn = "../calibration/K9.yaml";
+	//std::string parameters_fn = "../calibration/parameters.yaml";
 
-	etLeft->InitAndConfigure( FrameSrc::EYE_L, CM_fn_left, glintmodel_fn, K9_matrix_fn );
-	etRight->InitAndConfigure(FrameSrc::EYE_R, CM_fn_right, glintmodel_fn, K9_matrix_fn );
+	//etLeft->InitAndConfigure( FrameSrc::EYE_L, CM_fn_left, glintmodel_fn, K9_matrix_fn );
+	//etRight->InitAndConfigure(FrameSrc::EYE_R, CM_fn_right, glintmodel_fn, K9_matrix_fn );
+
+	etLeft->InitAndConfigure(FrameSrc::EYE_L, settings->CM_left_file, settings->glintmodel_file, settings->K9_file, settings->cam_left_eye_file);
+	etRight->InitAndConfigure(FrameSrc::EYE_R, settings->CM_right_file, settings->glintmodel_file, settings->K9_file, settings->cam_right_eye_file);
 
 	//cv::FileStorage fs(K9_matrix_fn, cv::FileStorage::READ);
-	// fs["K9_left"] >> K9_left;  // nää oli turhia (ellei sitten kalibroinnissa) t: Miika
-	// fs["K9_right"] >> K9_right;
+	cv::FileStorage fs(settings->K9_file, cv::FileStorage::READ);
+	fs["K9_left"] >> K9_left;
+	fs["K9_right"] >> K9_right;
 
-	//st = new TSceneTracker();
-	//st->SetCamFeedSource(FrameSrc::SCENE);
-	//st->InitAndConfigure(); // Doesn't read settings now. t: Miika
+	K9_left.convertTo(K9_left, CV_64F);
+	K9_right.convertTo(K9_right, CV_64F);
+
+	cv::FileStorage fs_cr(settings->camerarig_file, cv::FileStorage::READ);
+	//read and convert to Eigen
+	cv::Mat A_r2s_temp, A_l2r_temp;
+
+	fs_cr["right_to_scene"] >> A_r2s_temp;
+	fs_cr["left_to_right"] >> A_l2r_temp;
+
+	A_r2s_temp.convertTo(A_r2s_temp, CV_64F);
+	A_l2r_temp.convertTo(A_l2r_temp, CV_64F);
+
+	cv::cv2eigen(A_r2s_temp, A_r2s);
+	cv::cv2eigen(A_l2r_temp, A_l2r);
 
 	pauseWorking = false;
 
-	//ptimer = new TPerformanceTimer();
-
-	//TODO: Load these from config files
-
-	//// These are the matrices that transform (augmented) coordinates from the eye camera to the scene camera
-	// A_l2s << 0.999527, -0.010507, -0.028904, 0.024822,     (useless!)
-	// 		0.002372, -0.910701, 0.413060, -0.050344,
-	// 		-0.030663, -0.412933, -0.910245, 0.005679,
-	// 		0.000000, 0.000000, 0.000000, 1.000000;
-
-	// Estimated with the optics-based hardware calibration scheme:
-	// A_r2s << 0.999970, -0.007446, 0.002042, -0.032355,
-	// 		-0.007611, -0.906227, 0.422724, -0.042055,
-	// 		-0.001297, -0.422726, -0.906256, -0.001406,
-	// 		0.000000, 0.000000, 0.000000, 1.000000;
-
-	// Computed from the 3D model (one rotation of 23 degrees + translation):
-	A_r2s << 1.000000, -0.000000, -0.000000, -0.031000, 
-	  0.000000, -0.920505, 0.390731, -0.029422, 
-	  0.000000, -0.390731, -0.920505, 0.023737, 
-	  0.000000, 0.000000, 0.000000, 1.000000;
-	
-
-	//// the transformation from left eye camera to the right eye camera
-
-	// Optics based measures:
-	// A_l2r << 0.999519, -0.003039, -0.030866, 0.057229,
-	// 	0.003370, 0.999937, 0.010674, 0.004091,
-	// 	0.030832, -0.010772, 0.999467, -0.009809,
-	// 	0.000000, 0.000000, 0.000000, 1.000000;
-
-	// 3D model based measures:
-	A_l2r << 1, 0, 0, 0.062,
-	  0, 1, 0, 0,
-	  0, 0, 1, 0,
-	  0, 0, 0, 1;
-
-
-	//SETUP CAMERA MATRICES
-	//TODO: read these from cal file
-	// Silmäkamerat ovat tässä turhia (ja L ja R oli väärinpäin) t: Miika
-
-	// eyeCamL = new Camera();
-	// eyeCamR = new Camera();
 	sceneCam = new Camera();
 
 	//left
@@ -99,22 +73,34 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 	// eyeCamR->setDistortion(eye_distR);
 
 	//scene
-	double scene_intr[9] = { 611.3922, 0, 0, 0, 613.3425, 0, 321.8853, 239.7948, 1.0000 };
-	double scene_dist[5] = { 0.026858, -0.212083, 0.002701, -0.002490, 0.494850 };
-	sceneCam->setIntrinsicMatrix(scene_intr);
+	//double scene_intr[9] = { 611.3922, 0, 0, 0, 613.3425, 0, 321.8853, 239.7948, 1.0000 };
+	//double scene_dist[5] = { 0.026858, -0.212083, 0.002701, -0.002490, 0.494850 };
+	//sceneCam->setIntrinsicMatrix(scene_intr);
+	//sceneCam->setDistortion(scene_dist);
+
+	cv::Mat scene_intrinsic;// = cv::Mat(3, 3, CV_32F);
+	cv::Mat scene_dist;// = cv::Mat(1, 5, CV_32F);
+
+	scene_intrinsic.convertTo(scene_intrinsic, CV_64F);
+	scene_dist.convertTo(scene_dist, CV_64F);
+
+	fs_cr["scene_intr"] >> scene_intrinsic;
+	fs_cr["scene_dist"] >> scene_dist;
+
+	//convert
+
+	sceneCam->setIntrinsicMatrix(scene_intrinsic);
 	sceneCam->setDistortion(scene_dist);
 
-
 	// I made it read it here (Miika)
-	cv::FileStorage fs2(parameters_fn, cv::FileStorage::READ);
+	//cv::FileStorage fs2(parameters_fn, cv::FileStorage::READ);
+	cv::FileStorage fs2(settings->params_file, cv::FileStorage::READ);
 	fs2["kalman_R_max"] >> kalman_R_max;
 
 	//param_est = cv::Mat_<double>(4, 1) << pog_scam.x, pog_scam.y, 0, 0;
 	param_est = cv::Mat::zeros(4,1, CV_64F);
 	P_est = cv::Mat::eye(4, 4, CV_64F);
 	pog_scam_prev = cv::Point2d(320,240); // TODO: This should be "pog_scam" the first time!
-
-
 
 }
 
@@ -394,8 +380,8 @@ void FrameProcessor::Process()
 				bool USE_KALMAN = 1;  // TODO: define elsewhere
 
 				cv::UMat* sceneImage = frame->getImg(FrameSrc::SCENE);  // moved this here t: Miika
-				cv::flip(*sceneImage, *sceneImage, 1);    // The scene camera is upside down (t: Miika)
-				cv::flip(*sceneImage, *sceneImage, 0);
+				//cv::flip(*sceneImage, *sceneImage, 1);    // The scene camera is upside down (t: Miika)
+				//cv::flip(*sceneImage, *sceneImage, 0);
 
 				if (USE_KALMAN) {
 					cv::circle(*sceneImage, pog_scam, 15, cv::Scalar(0, 150, 0), -1, 8);  // Plot the un-filtered point

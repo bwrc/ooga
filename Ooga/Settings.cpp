@@ -24,8 +24,6 @@ bool TSettings::processCommandLine(int argc, char** argv)
 		boost::filesystem::path ROOTPATH(boost::filesystem::initial_path<boost::filesystem::path>());
 		ROOTPATH = ROOTPATH.parent_path();
 
-		//std::string rootpath = "c:/Code/SmarterTracker/";
-
 		//define help text
 		po::options_description poDesc("Allowed options");
 		poDesc.add_options()
@@ -47,13 +45,17 @@ bool TSettings::processCommandLine(int argc, char** argv)
 		}
 
 		if (vm.count("config")){
+#ifdef WIN32
+			configFile = ROOTPATH.string() + "\\" + vm["config"].as< std::string >();
+#else
 			configFile = ROOTPATH.string() + "/" + vm["config"].as< std::string >();
+#endif
 			//configFile = rootpath + vm["config"].as< std::string >();
 			std::cout << "Using config file " << configFile << std::endl;
 		}
 		else {
 #ifdef _WIN32
-			configFile = ROOTPATH.string() + "/config/" + std::string(DEFAULT_CONFIG_FILE);
+			configFile = ROOTPATH.string() + "\\config\\" + std::string(DEFAULT_CONFIG_FILE);
 			//configFile = rootpath + "\\config\\" + std::string(DEFAULT_CONFIG_FILE);
 #else
 			configFile = ROOTPATH.string() + "/config/" + std::string(DEFAULT_CONFIG_FILE);
@@ -106,14 +108,15 @@ void TSettings::loadSettings(std::string filename)
 
 	//LEFT eye camera
 	if (tree.get<std::string>("settings.cameras.eyeleft.<xmlattr>.type") == "cam"){
-		eyeLeftCam.type = 0;
+		eyeLeftCam.type = 0; //camera
 	}
 	else {
-		eyeLeftCam.type = 1;
+		eyeLeftCam.type = 1; //video file
 	}
 	eyeLeftCam.feedNumber = tree.get<int>("settings.cameras.eyeleft.num", 0);
 	eyeLeftCam.fileName = tree.get<std::string>("settings.cameras.eyeleft.file", "");
-	eyeLeftCam.calibrationFile = tree.get<std::string>("settings.cameras.eyeleft.cal", "eye.yaml");
+	eyeLeftCam.flip = tree.get<int>("settings.cameras.eyeleft.flip", 0);
+// moved to calibration block	eyeLeftCam.calibrationFile = tree.get<std::string>("settings.cameras.eyeleft.cal", "eye.yaml");
 
 	//RIGHT eye camera
 	if (tree.get<std::string>("settings.cameras.eyeright.<xmlattr>.type") == "cam"){
@@ -124,7 +127,8 @@ void TSettings::loadSettings(std::string filename)
 	}
 	eyeRightCam.feedNumber = tree.get<int>("settings.cameras.eyeright.num", 0);
 	eyeRightCam.fileName = tree.get<std::string>("settings.cameras.eyeright.file", "");
-	eyeRightCam.calibrationFile = tree.get<std::string>("settings.cameras.eyeright.cal", "eye.yaml");
+	eyeRightCam.flip = tree.get<int>("settings.cameras.eyeright.flip", 0);
+	// moved to calibration block	eyeRightCam.calibrationFile = tree.get<std::string>("settings.cameras.eyeright.cal", "eye.yaml");
 
 	//scene camera
 	if (tree.get<std::string>("settings.cameras.scene.<xmlattr>.type") == "cam"){
@@ -135,7 +139,8 @@ void TSettings::loadSettings(std::string filename)
 	}
 	sceneCam.feedNumber = tree.get<int>("settings.cameras.scene.num", 0);
 	sceneCam.fileName = tree.get<std::string>("settings.cameras.scene.file", "");
-	sceneCam.calibrationFile = tree.get<std::string>("settings.cameras.scene.cal", "scene.yaml");
+	sceneCam.flip = tree.get<int>("settings.cameras.scene.flip", 0);
+	//sceneCam.calibrationFile = tree.get<std::string>("settings.cameras.scene.cal", "scene.yaml");
 
 	if (tree.get<std::string>("settings.savefiles") == "true"){
 		saveFrames = true;
@@ -144,7 +149,15 @@ void TSettings::loadSettings(std::string filename)
 		saveFrames = false;
 	}
 
-
+	//calibration data
+	camerarig_file = tree.get<std::string>("settings.calibration.camerarig.<xmlattr>.filename", "../calibration/camerarig.yaml");
+	K9_file = tree.get<std::string>("settings.calibration.K9.<xmlattr>.filename", "../calibration/K9.yaml");
+	CM_left_file = tree.get<std::string>("settings.calibration.CM_left.<xmlattr>.filename", "../calibration/file_CM_left");
+	CM_right_file = tree.get<std::string>("settings.calibration.CM_right.<xmlattr>.filename", "../calibration/file_CM_right");
+	glintmodel_file = tree.get<std::string>("settings.calibration.glintmodel.<xmlattr>.filename", "../calibration/glint_model.yaml");
+	params_file = tree.get<std::string>("settings.calibration.parameters.<xmlattr>.filename", "../calibration/parameters.yaml");
+	cam_left_eye_file = tree.get<std::string>("settings.calibration.cam_lefteye.<xmlattr>.filename", "../calibration/eye_cam_left.yaml");
+	cam_right_eye_file = tree.get<std::string>("settings.calibration.cam_righteye.<xmlattr>.filename", "../calibration/eye_cam_right.yaml");
 }
 
 void TSettings::saveSettings(std::string filename)

@@ -35,11 +35,13 @@ VideoIOHandler::~VideoIOHandler()
 *	\param cap a pointer to a VideoCapture from the calling entity
 *	\return the number of the camera assigned (needed for at least the video saver)
 */
-int VideoIOHandler::AddCamera(FrameSrc f, cv::VideoCapture *cap)
+int VideoIOHandler::AddCamera(FrameSrc f, cv::VideoCapture *cap, int flip)
 {
 	//todo: vector fills up regardless of FrameSrc. Ok, if in "right order"
 	//should these just be three different caps?
 	caps.push_back(cap);
+	flips.push_back(flip);
+
 	return caps.size();
 }
 
@@ -96,15 +98,34 @@ void VideoIOHandler::GrabFramesInThread()
 
 				frame->setNumber(totalGrabbed);
 
+				cv::UMat *grab;
+				for (int i = 0; i < caps.size(); ++i){
+					grab = frame->getImg(FrameSrc(i));
+					caps[i]->retrieve(*grab);
+					//check if image should be flipped (config)
+					switch (flips[i]){
+					case 0:
+						//nada
+						break;
+					case 1:
+						cv::flip(*grab, *grab, 0);
+					case 2:
+						cv::flip(*grab, *grab, 1);
+					case 3:
+						cv::flip(*grab, *grab, -1);
+					}
+
+				}
+
 				//todo: is this good?
-				int i = 0;
+/*				int i = 0;
 				cv::UMat *grab;
 				for (auto &cap : caps){
 					grab = frame->getImg(FrameSrc(i));
 					cap->retrieve(*grab);
 					++i;
 				}
-
+*/
 				gs.frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
 				frame->setTimestamp(gs.frameTime);// std::chrono::duration_cast<msecs>(hrclock::now() - _start));
 

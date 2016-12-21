@@ -14,7 +14,8 @@
 
 // enumeration for identifying frame source
 // if binocular, EYE -> EYE_L, EYE_R
-enum class FrameSrc{ SCENE, EYE_L, EYE_R };
+//enum class FrameSrc{ SCENE, EYE_L, EYE_R };
+enum class FrameSrc{ EYE_R, EYE_L, SCENE };
 
 class TBinocularFrame
 {

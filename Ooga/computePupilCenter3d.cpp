@@ -6,8 +6,8 @@ cv::Point3d computePupilCenter3d(std::vector<cv::Point3d> pupilEllipsePoints3d, 
 
   // Constants
   double R = 0.0077;        // corneal radius
-  double n_cornea = 1.336;  // defrection index of cornea
-  double r_d = 0.0035;      // distance between cornea center and pupil plane, in meters
+  double n_cornea = 1.336;  // refractive index of cornea
+  double r_d = 0.00375;      // distance between cornea center and pupil plane, in meters (3.5 mm or 3.75 mm?)
  
   // Normalize the 3D vectors and denote them with 'K'
   std::vector<cv::Point3d> K_all;
@@ -36,7 +36,8 @@ cv::Point3d computePupilCenter3d(std::vector<cv::Point3d> pupilEllipsePoints3d, 
   }
 
   // The radius of the pupil as half of the major axis (first two K vectors point to the major axis end points, as agreed):
-  double r_p = norm(u[0]-u[1]) * norm(u[0]-u[1]) / 2;
+  //double r_p = norm(u[0]-u[1]) * norm(u[0]-u[1]) / 2;  // WHY are two norms multiplied??
+  double r_p = norm(u[0]-u[1]) / 2;
   double r_ps2 = r_d*r_d + r_p*r_p;
 
   cv::Point3d u_hat_sum = cv::Point3d(0,0,0);

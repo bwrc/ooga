@@ -12,7 +12,7 @@ PerformanceTimer.cpp VideoWriterNoThread.cpp \
 EyeTracker.cpp \
 PupilEstimator.cpp FrameBinocular.cpp \
 Settings.cpp FrameProcessor.cpp GlintFinder.cpp Ooga.cpp \
-computePupilCenter3d.cpp getPupilCenter.cpp getPupilEllipse.cpp getPupilEllipsePoints.cpp kalmanFilterGazePoint.cpp
+computePupilCenter3d.cpp getPupilCenter.cpp getPupilEllipsePoints.cpp kalmanFilterGazePoint.cpp
 
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=ooga

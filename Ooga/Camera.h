@@ -68,6 +68,10 @@ public:
     void setIntrinsicMatrix(const double intr[9]);
     void setDistortion(const double _dist[5]);
 
+	//overloads for matrices
+	void setIntrinsicMatrix(const cv::Mat _intr);
+	void setDistortion(const cv::Mat _dist);
+
     const cv::Mat& getIntrisicMatrix() const {return intrinsic_matrix;}
     const cv::Mat& getDistortion() const {return distortion;}
 

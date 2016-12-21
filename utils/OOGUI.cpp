@@ -1,6 +1,6 @@
 //#include "stdafx.h"
 #include "OOGUI.h"
-#include "..\utils\helpers.h"
+#include "../utils/helpers.h"
 
 OOGUI::OOGUI()
 {
@@ -22,6 +22,9 @@ OOGUI::~OOGUI()
 	glDeleteBuffers(1, &VBO);
 	glDeleteBuffers(1, &EBO);
 
+	glfwDestroyCursor(cursor_normal);
+	glfwDestroyCursor(cursor_crosshair);
+
 	// Close OpenGL window and terminate GLFW
 	glfwTerminate();
 }
@@ -42,7 +45,7 @@ bool OOGUI::Initialize() {
 
 	// Open OpenGL window
 	this->setSize(1280, 960);
-	window = glfwCreateWindow(width, height, "OOGA UI practice", NULL, NULL);
+	window = glfwCreateWindow(width, height, "OOGA :: version", NULL, NULL);
 
 	//add this: install 3.2 glfwSetWindowAspectRatio(1280, 960);
 
@@ -126,6 +129,10 @@ bool OOGUI::Initialize() {
 	glBindVertexArray(0); 
 
 	loadedAll = true;
+
+	//create cursors
+	cursor_normal = glfwCreateStandardCursor(GLFW_CURSOR_NORMAL);
+	cursor_crosshair = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
 
 	return true;
 }
@@ -322,12 +329,12 @@ void OOGUI::cursorPosFun(double x, double y)
 
 //	std::cerr << "cursor at " << sx << ", " << sy << "in win " << currentlyOnTopOf << std::endl;
 
-	switch (active_view)
+	switch (currentlyOnTopOf)
 	{
 	case 1:
 		do_redraw = true;
 		break;
-	case 3:
+	case 3: //scene
 		do_redraw = true;
 		break;
 	case 4:
@@ -363,11 +370,77 @@ void OOGUI::mouseButtonFun( int button, int action, int mods)
 		active_view = 0;
 	}
 
+	//if click on scene
+	if ((active_view == 3)  && getCalibrationSamples){
+
+		int wnd_width, wnd_height, fb_width, fb_height;
+		double scale;
+
+		glfwGetWindowSize(window, &wnd_width, &wnd_height);
+		glfwGetFramebufferSize(window, &fb_width, &fb_height);
+
+		scale = (double)fb_width / (double)wnd_width;
+
+		//todo: should these be doubles -> subpixels if window stretched?
+		int x = xpos * scale;
+		int y = ypos * scale;
+
+		//scale mouse clicks to correspond to original video coordinates
+		int hw = width / 2;
+		int hh = height / 2;
+
+		int sx, sy; //scaled
+
+		sx = fmod(x, hw) / float(hw) * 640;
+		sy = fmod(y, hh) / float(hh) * 480;
+
+		std::cout << "add calib sample: " << sx << ", " << sy << std::endl;
+
+		//todo: addCalibrationSample(sx, sy);
+	}
+
 	do_redraw = true;
+}
+
+void OOGUI::SetCallBackFunction(std::function<void(RunningModes mode, bool value)> callback){
+	modeCallBack = callback;
 }
 
 void OOGUI::key_callback(int key, int scancode, int action, int mods)
 {
+	//std::cout << "key: " << key << std::endl;
+	if (action == GLFW_PRESS){ //only consider first presses
+		switch (key){
+		case GLFW_KEY_ESCAPE:
+			//TODO: killwindowcallback
+			modeCallBack(OOGA_MODE_RUNNING, false);
+			glfwSetWindowShouldClose(window, GL_TRUE);
+			break;
+		case GLFW_KEY_C:
+			getCalibrationSamples = !getCalibrationSamples; // toggle calibration on/off
+			if (getCalibrationSamples){
+				glfwSetCursor(window, cursor_crosshair);
+			}
+			else {
+				glfwSetCursor(window, cursor_normal);
+			}
+			modeCallBack(OOGA_MODE_CALIBRATE, getCalibrationSamples);
+			break;
+		case GLFW_KEY_N:
+			//todo: oogaCallBack( OOGA_NEXT_FRAME );
+			break;
+		case GLFW_KEY_R:
+			//todo: oogaCallBack( OOGA_MODE_CALIBRATE, true );
+			break;
+		case GLFW_KEY_SPACE:
+			//todo: oogaCallBack( OOGA_PAUSE );
+			break;
+
+		default:
+			std::cout << "unknown key: " << key << std::endl;
+		}
+	}
+
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
 }
@@ -386,6 +459,25 @@ bool OOGUI::update() {
 
 	return true;
 }
+
+void OOGUI::pushFrame(TBinocularFrame &frame) {
+	if (firstrun){ // create textures if first round, otherwise just update
+		firstrun = false; 
+		textureid[0] = matToTexture(true, 0, (frame.getImg(FrameSrc::EYE_R))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
+		textureid[1] = matToTexture(true, 0, (frame.getImg(FrameSrc::EYE_L))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
+		textureid[2] = matToTexture(true, 0, (frame.getImg(FrameSrc::SCENE))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
+		textureid[3] = matToTexture(true, 0, (frame.getImg(FrameSrc::SCENE))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
+		//textureid[3] = matToTexture(true, 0, frame.at(3), GL_NEAREST, GL_NEAREST, GL_CLAMP);
+	}
+	else {
+		matToTexture(false, textureid[0], (frame.getImg(FrameSrc::EYE_R))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
+		matToTexture(false, textureid[1], (frame.getImg(FrameSrc::EYE_L))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
+		matToTexture(false, textureid[2], (frame.getImg(FrameSrc::SCENE))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
+		matToTexture(false, textureid[3], (frame.getImg(FrameSrc::SCENE))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
+	}
+	do_redraw = true;
+}
+
 
 void OOGUI::pushFrame(std::vector<cv::Mat> &frame) {
 
