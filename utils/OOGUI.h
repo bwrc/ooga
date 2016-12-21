@@ -43,6 +43,7 @@ public:
 
 	void drawViewPort(int num, int x, int y, int width, int height);
 	void SetCallBackFunction(std::function<void(RunningModes mode, bool value)> callback);
+	void SetLayout(int _layout);
 
 	void RenderState(int viewport);
 
@@ -114,6 +115,7 @@ private:
 	// 4 = lower right
 	int active_view = 0;
 	// Do redraw?
+	int layout = 0;
 	bool do_redraw = 1;
 	bool redraws[4]; //for each window part
 

@@ -9,7 +9,7 @@ OOGUI::OOGUI()
 		fprintf(stderr, "Failed to initialize GLFW\n");
 		exit(EXIT_FAILURE);
 	}
-
+	layout = 0;
 }
 
 OOGUI::~OOGUI()
@@ -32,6 +32,24 @@ OOGUI::~OOGUI()
 void OOGUI::setSize(int w, int h) {
 	width = w;
 	height = h;
+}
+
+void OOGUI::SetLayout(int _layout){
+	int w, h;
+	float aspect = 1.0f;
+	glfwGetWindowSize(window, &w, &h);
+
+	switch (layout){
+	case 0: 
+		aspect = 1280.0 / 960.0;
+		break;
+	case 1:
+		aspect = 1.0;
+		break;
+	}
+	glfwSetWindowSize(window, w, w / aspect);
+
+	layout = _layout;
 }
 
 bool OOGUI::Initialize() {
@@ -221,8 +239,6 @@ void OOGUI::drawAllViews()
 	// Enable depth test
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-
-	int layout = 1;
 
 	switch (layout){
 	case 0: //default 4x4
@@ -451,7 +467,12 @@ void OOGUI::key_callback(int key, int scancode, int action, int mods)
 		case GLFW_KEY_SPACE:
 			//todo: oogaCallBack( OOGA_PAUSE );
 			break;
-
+		case GLFW_KEY_1:
+			SetLayout(0);
+			break;
+		case GLFW_KEY_2:
+			SetLayout(1);
+			break;
 		default:
 			std::cout << "unknown key: " << key << std::endl;
 		}
