@@ -40,7 +40,7 @@ void OOGUI::SetLayout(int _layout){
 	glfwGetWindowSize(window, &w, &h);
 	//todo: check if w/h too big for screen
 	switch (layout){
-	case 1: 
+	case 1:
 		aspect = 1280.0 / 960.0;
 		break;
 	case 2:
@@ -79,7 +79,7 @@ bool OOGUI::Initialize() {
 	}
 
 	//Make our window current
-	//this was kinky, opening an OpenCV window with imshow 
+	//this was kinky, opening an OpenCV window with imshow
 	//screwed up GLEW initialization (that context apparently became active)
 	glfwMakeContextCurrent(window);
 
@@ -114,7 +114,7 @@ bool OOGUI::Initialize() {
 	{
 		glEnable(GL_MULTISAMPLE_ARB);
 	}
-	
+
 	glfwGetFramebufferSize(window, &width, &height);
 	framebufferSizeFun(width, height);
 
@@ -146,8 +146,8 @@ bool OOGUI::Initialize() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, faces.size() * sizeof(int) * 3, &faces.front(), GL_STATIC_DRAW);
 
 	//unbind
-	glBindBuffer(GL_ARRAY_BUFFER, 0); 
-	glBindVertexArray(0); 
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 
 	loadedAll = true;
 
@@ -191,7 +191,7 @@ bool OOGUI::LoadShaders() {
 		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 	// Link shaders
-	//moved to class GLuint 
+	//moved to class GLuint
 	shaderProgram = glCreateProgram();
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader);
@@ -310,12 +310,12 @@ void OOGUI::drawViewPort(int num, int x, int y, int width, int height) {
 	glm::mat4x4 projection =
 			glm::ortho(0.0f, float(width), 0.0f, float(height), 0.0f, 5.0f);
 			//glm::perspective(45.0f, (GLfloat)640 / (GLfloat)480, 0.1f, 100.0f);
-	
+
 	// Get the uniform locations
 	GLint modelLoc = glGetUniformLocation(shaderProgram, "model");
 	GLint viewLoc = glGetUniformLocation(shaderProgram, "view");
 	GLint projLoc = glGetUniformLocation(shaderProgram, "projection");
-	
+
 	// Pass the matrices to the shader
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
@@ -408,7 +408,7 @@ void OOGUI::mouseButtonFun( int button, int action, int mods)
 		// Detect which of the four views was clicked
 		//here coords from upper left
 		switch (layout){
-		case 1: //2x2 
+		case 1: //2x2
 			active_view = 1;
 			if (xpos >= width / 2)
 				active_view += 1;
@@ -553,7 +553,7 @@ bool OOGUI::update() {
 
 void OOGUI::pushFrame(TBinocularFrame &frame) {
 	if (firstrun){ // create textures if first round, otherwise just update
-		firstrun = false; 
+		firstrun = false;
 		textureid[0] = matToTexture(true, 0, (frame.getImg(FrameSrc::EYE_R))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
 		textureid[1] = matToTexture(true, 0, (frame.getImg(FrameSrc::EYE_L))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);
 		textureid[2] = matToTexture(true, 0, (frame.getImg(FrameSrc::SCENE))->getMat(cv::ACCESS_READ), GL_NEAREST, GL_NEAREST, GL_CLAMP);

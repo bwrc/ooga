@@ -5,7 +5,7 @@
 #include <GL/glew.h>
 #define GLFW_INCLUDE_GLU
 #define GLFW_INCLUDE GLEXT
-#include "glfw/glfw3.h"
+#include "GLFW/glfw3.h"
 
 #include <glm/glm.hpp> //GL Math
 #include <glm/gtc/matrix_transform.hpp>

@@ -22,7 +22,7 @@ std::string readFile(const char *filePath) {
 	return content;
 }
 
-GLuint matToTexture(bool generateNewTexture, GLuint textureID, cv::Mat &mat, GLenum minFilter, GLenum magFilter, GLenum wrapFilter)
+GLuint matToTexture(bool generateNewTexture, GLuint textureID, const cv::Mat &mat, GLenum minFilter, GLenum magFilter, GLenum wrapFilter)
 {
 	// Generate a number for our textureID's unique handle
 	// unless we already have one
