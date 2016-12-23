@@ -1,0 +1,12 @@
+#ifndef OOGA_CONSTANTS_H
+#define OOGA_CONSTANTS_H
+
+enum RunningModes {
+	OOGA_MODE_CALIBRATE = 1,
+	OOGA_MODE_RUNNING = 2,
+	OOGA_MODE_PAUSED = 3,
+	OOGA_MODE_RECORDING = 4
+};
+
+
+#endif

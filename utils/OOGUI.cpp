@@ -9,7 +9,7 @@ OOGUI::OOGUI()
 		fprintf(stderr, "Failed to initialize GLFW\n");
 		exit(EXIT_FAILURE);
 	}
-	layout = 0;
+	layout = 1;
 }
 
 OOGUI::~OOGUI()
@@ -38,13 +38,16 @@ void OOGUI::SetLayout(int _layout){
 	int w, h;
 	float aspect = 1.0f;
 	glfwGetWindowSize(window, &w, &h);
-
+	//todo: check if w/h too big for screen
 	switch (layout){
-	case 0: 
+	case 1: 
 		aspect = 1280.0 / 960.0;
 		break;
-	case 1:
+	case 2:
 		aspect = 1.0;
+		break;
+	case 3:
+		aspect = 1280.0 / 720.0;
 		break;
 	}
 	glfwSetWindowSize(window, w, w / aspect);
@@ -240,8 +243,11 @@ void OOGUI::drawAllViews()
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
+	int h_limit = 0;
+	int w_limit = 0;
+
 	switch (layout){
-	case 0: //default 4x4
+	case 1: //default 4x4
 		// Upper left view (TOP VIEW)
 		drawViewPort(1, 0, height / 2, width / 2, height / 2);
 		//Upper right
@@ -251,8 +257,8 @@ void OOGUI::drawAllViews()
 		//Lower right
 		drawViewPort(4, width / 2, 0, width / 2, height / 2);
 		break;
-	case 1:
-		int h_limit = 3.0 / 4.0 * height;
+	case 2: //eyes on top
+		h_limit = 3.0 / 4.0 * height;
 		// left eye
 		drawViewPort(1, 0, h_limit, width/3, height/4);
 		//right eye
@@ -261,6 +267,17 @@ void OOGUI::drawAllViews()
 		drawViewPort(3, 0, 0, width, h_limit);
 		//stats
 		drawViewPort(4, width *2/3, h_limit, width / 3, height / 4);
+		break;
+	case 3: //eyes on right
+		w_limit = 3.0 / 4.0 * width;
+		// left eye
+		drawViewPort(1, w_limit, height*2/3, width/4, height/3);
+		//right eye
+		drawViewPort(2, w_limit, height/3, width/4, height / 3);
+		// scene
+		drawViewPort(3, 0, 0, w_limit, height);
+		//stats
+		drawViewPort(4, w_limit, 0, width / 4, height / 3);
 		break;
 	}
 
@@ -361,7 +378,7 @@ void OOGUI::cursorPosFun(double x, double y)
 
 //	std::cerr << "cursor at " << sx << ", " << sy << "in win " << currentlyOnTopOf << std::endl;
 
-	switch (currentlyOnTopOf)
+/*	switch (currentlyOnTopOf)
 	{
 	case 1:
 		do_redraw = true;
@@ -375,7 +392,7 @@ void OOGUI::cursorPosFun(double x, double y)
 	default:
 		break;
 	}
-
+*/
 	// Remember cursor position
 	xpos = x;
 	ypos = y;
@@ -388,49 +405,83 @@ void OOGUI::mouseButtonFun( int button, int action, int mods)
 {
 	if ((button == GLFW_MOUSE_BUTTON_LEFT) && action == GLFW_PRESS)
 	{
-		// this works for 2x2 split only
 		// Detect which of the four views was clicked
-		active_view = 1;
-		if (xpos >= width / 2)
-			active_view += 1;
-		if (ypos >= height / 2)
-			active_view += 2;
+		//here coords from upper left
+		switch (layout){
+		case 1: //2x2 
+			active_view = 1;
+			if (xpos >= width / 2)
+				active_view += 1;
+			if (ypos >= height / 2)
+				active_view += 2;
+			break;
+		case 2: //eyes on top
+			active_view = 1;
+			if (ypos >= height / 4.0){ active_view = 3; }
+			else {
+				if (xpos >= 2.0 / 3.0 * width){ active_view = 4; }
+				else if (xpos >= 1.0 / 3.0*width){ active_view = 2; }
+			}
+			break;
+		case 3: //eyes on right
+			active_view = 3;
+			if (xpos >= 3.0 / 4.0 * width){
+				if (ypos >= 2.0 / 3.0*height){ active_view = 4; }
+				else if (ypos >= 1.0 / 3.0*height){ active_view = 2; }
+				else{ active_view = 1; }
+			}
+			break;
+		}
+
+		//if click on scene and calibration samples are collected
+		if ((active_view == 3) && getCalibrationSamples){
+
+			int wnd_width, wnd_height, fb_width, fb_height;
+
+			glfwGetWindowSize(window, &wnd_width, &wnd_height);
+			glfwGetFramebufferSize(window, &fb_width, &fb_height);
+
+			double scale = (double)fb_width / (double)wnd_width;
+			double x = xpos * scale;
+			double y = ypos * scale;
+
+			double hw, hh;
+			double offset_h, offset_w;
+
+			//scale mouse clicks to correspond to original video coordinates
+			switch (layout){
+			case 1: //2x2, half of height
+				hw = width / 2;
+				hh = height / 2;
+				offset_w = 0;
+				offset_h = height / 2;
+				break;
+			case 2: //eyes on top
+				hw = width;
+				hh = 3.0 / 4.0*height;
+				offset_w = 0;
+				offset_h = height / 4.0;
+				break;
+			case 3:
+				hw = 3.0 / 4.0*width;
+				hh = height;
+				offset_w = 0;
+				offset_h = 0;
+			}
+
+			double sx, sy; //scaled
+
+			sx = fmod((x - offset_w), hw) / hw*640.0;
+			sy = fmod((y - offset_h), hh) / hh*640.0;
+
+			//		sx = fmod(x, hw) / float(hw) * 640;
+			//		sy = fmod(y, hh) / float(hh) * 480;
+
+			std::cout << "add calib sample: " << sx << ", " << sy << std::endl;
+
+			//todo: addCalibrationSample(sx, sy);
+		}
 	}
-	else if (button == GLFW_MOUSE_BUTTON_LEFT)
-	{
-		// Deselect any previously selected view
-		active_view = 0;
-	}
-
-	//if click on scene
-	if ((active_view == 3)  && getCalibrationSamples){
-
-		int wnd_width, wnd_height, fb_width, fb_height;
-		double scale;
-
-		glfwGetWindowSize(window, &wnd_width, &wnd_height);
-		glfwGetFramebufferSize(window, &fb_width, &fb_height);
-
-		scale = (double)fb_width / (double)wnd_width;
-
-		//todo: should these be doubles -> subpixels if window stretched?
-		int x = xpos * scale;
-		int y = ypos * scale;
-
-		//scale mouse clicks to correspond to original video coordinates
-		int hw = width / 2;
-		int hh = height / 2;
-
-		int sx, sy; //scaled
-
-		sx = fmod(x, hw) / float(hw) * 640;
-		sy = fmod(y, hh) / float(hh) * 480;
-
-		std::cout << "add calib sample: " << sx << ", " << sy << std::endl;
-
-		//todo: addCalibrationSample(sx, sy);
-	}
-
 	do_redraw = true;
 }
 
@@ -468,10 +519,13 @@ void OOGUI::key_callback(int key, int scancode, int action, int mods)
 			//todo: oogaCallBack( OOGA_PAUSE );
 			break;
 		case GLFW_KEY_1:
-			SetLayout(0);
+			SetLayout(1);
 			break;
 		case GLFW_KEY_2:
-			SetLayout(1);
+			SetLayout(2);
+			break;
+		case GLFW_KEY_3:
+			SetLayout(3);
 			break;
 		default:
 			std::cout << "unknown key: " << key << std::endl;
