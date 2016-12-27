@@ -58,8 +58,6 @@ private:
 	//boost::thread eyeThread;
 	//boost::thread sceneThread;
 
-	Camera* eyeCamL;
-	Camera* eyeCamR;
 	Camera* sceneCam;
 
 	EyeTracker *etLeft;

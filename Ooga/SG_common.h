@@ -14,6 +14,8 @@ struct TGrabStatistics{
 	msecs waitTime;
 };
 
+// todo: this should hold only the intermediate results
+// todo: there should be another system for outputing the actual results
 struct TTrackingResult{
 	cv::Point2d pupilCenter2D;
 	cv::Point3d pupilCenter3D;
