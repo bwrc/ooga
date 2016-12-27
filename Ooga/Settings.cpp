@@ -19,7 +19,7 @@ bool TSettings::processCommandLine(int argc, char** argv)
 #endif
 {
 	try{
-
+		std::cout << argv << std::endl;
 		//get root path
 		boost::filesystem::path ROOTPATH(boost::filesystem::initial_path<boost::filesystem::path>());
 		ROOTPATH = ROOTPATH.parent_path();

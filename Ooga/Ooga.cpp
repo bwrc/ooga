@@ -20,7 +20,7 @@
 
 NOTE: For Visual Studio, must add the following for debugging properties (with proper user paths):
 command line: --config config\config.xml
-environment: C:\Dev\gsl\x86\lib;C:\Dev\opencv3\bin\install\x86\vc12\bin;C:\Dev\boost\lib;C:\Dev\tbb44_20160526oss\bin\ia32\vc14 
+environment: C:\Dev\gsl\x86\lib;C:\Dev\opencv3\bin\install\x86\vc12\bin;C:\Dev\boost\lib;C:\Dev\tbb44_20160526oss\bin\ia32\vc14
 (TBB optional on OpenCV)
 
 // ===========================================================================================================*/
@@ -50,6 +50,7 @@ void ModeCallBack(RunningModes mode, bool value){
 		break;
 	case (OOGA_MODE_RUNNING) :
 		std::cout << "RUN" << std::endl;
+
 		break;
 	case (OOGA_MODE_PAUSED) :
 		std::cout << "PAUSE" << std::endl;
@@ -293,7 +294,7 @@ int _tmain(int argc, _TCHAR* argv[])
 				//case 50: //2
 				//grabber->setFrameDurationTest(++framedur);
 				//break;
-	  
+
 	}
 	*/
 

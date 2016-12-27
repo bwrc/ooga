@@ -1,37 +1,37 @@
 <?xml version="1.0"?>
 <settings>
 
-	<!-- 
+	<!--
 	list cameras here, <eyeleft>, <eyeright> or <scene>
 	    count = number of cameras
 		type: cam, file
-		flip: 0 = none, 
-		      1 = vertical, 
-			  2 = horizontal, 
+		flip: 0 = none,
+		      1 = vertical,
+			  2 = horizontal,
 			  3 = both
-		subtags: 
+		subtags:
 			<num> : cam feed number (USB)
 			<file>: file name to source video (with relative path)
 	-->
 	<cameras count="3">
 		<eyeleft type="video">
 			<num>1</num>
-			<file>../videos/sg01_cam2.mjpg</file>
+			<file>../videos/sg01_cam1.mjpg</file>
 			<flip>0</flip>
 		</eyeleft>
 		<eyeright type="video">
 			<num>2</num>
-			<file>../videos/sg01_cam3.mjpg</file>
+			<file>../videos/sg01_cam2.mjpg</file>
 			<flip>0</flip>
 		</eyeleft>
-		<scene type="cam">
+		<scene type="video">
 			<num>0</num>
-			<file>../videos/sg01_cam1.mjpg</file>
-			<flip>0</flip>			
+			<file>../videos/sg01_cam3.mjpg</file>
+			<flip>3</flip>
 		</scene>
 	</cameras>
 	<savefiles>true</savefiles>
-		
+
 	<calibration>
 		<camerarig filename="../calibration/camerarig.yaml"/>
 		<cam_lefteye filename="../calibration/eye_cam_left.yaml"/>
@@ -43,11 +43,11 @@
 		<parameters filename="../calibration/parameters.yaml"/>
 	</calibration>
 
-	<!-- 
+	<!--
 	how to handle the results:
 		<savevideos>1 = yes, 0 = no</savevideos>
 		<videofolder>resvideos/</videofolder>
-		<output>txt</output> 
+		<output>txt</output>
 		<streamdata>1 = yes, 0 = no</streamdata>
 		<LSL streamname="insert stream name" streamtype="VOG"/>
 	-->
@@ -58,5 +58,5 @@
 		<streamdata>0</streamdata>
 		<LSL streamname="SG_stream" streamtype="VOG"/>
 	</results>
-	
+
 </settings>

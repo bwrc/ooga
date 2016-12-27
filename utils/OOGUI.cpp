@@ -159,8 +159,8 @@ bool OOGUI::Initialize() {
 }
 
 bool OOGUI::LoadShaders() {
-	std::string svertex = readFile("..\\utils\\shaders\\vert.sha");
-	std::string sfrag = readFile("..\\utils\\shaders\\frag.sha");
+	std::string svertex = readFile("../utils/shaders/vert.sha");
+	std::string sfrag = readFile("../utils/shaders/frag.sha");
 
 	// Build and compile our shader program
 	// Vertex shader
