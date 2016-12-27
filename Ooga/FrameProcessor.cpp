@@ -192,7 +192,7 @@ void FrameProcessor::Process()
 	  cv::Point3d K9_times_optical_vector_point_R(K9_times_optical_vector_mat_R);//.at<float>(0), K9_times_optical_vector_mat_R.at<float>(1), K9_times_optical_vector_mat_R.at<float>(2));
 	  gazeVectorR = K9_times_optical_vector_point_R / cv::norm(K9_times_optical_vector_point_R);
 
-	  int blinking = 0;
+	  bool blinking = 1;
 	  if (resR->score + resL->score > 0.7) {  // good scores --> not blinking
 	    blinking = 0;
 	  }
@@ -341,7 +341,6 @@ void FrameProcessor::Process()
 	  cv::circle(*sceneImage, pog_scam, 35 * (1 - best_score) + 5, cv::Scalar(0, 0, 250), 7, 8);
 	  
 	  if (blinking) {  // TODO: Why it never blinks?
-	    std::cout << "BLINK ------------- " << std::endl;
 	    cv::putText(*sceneImage, "BLINK ", cv::Point2d(100, 300), CV_FONT_HERSHEY_PLAIN, 10, CV_RGB(250, 0, 100), 5);
 	  }
 	  if (!using_both_eyes) { // print text, if only other eye is used?
