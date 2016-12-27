@@ -523,8 +523,8 @@ void FrameProcessor::Process()
 	  qIn->reportConsumerTime(processingTime.count());
 	  my_mtx.unlock();
 
-	  // msecs frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
-	  // std::cout << frameTime.count() << std::endl;  // miikan kellotus
+	  msecs frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
+	  std::cout << frameTime.count() << std::endl;  // miikan kellotus
 			
 	}
 

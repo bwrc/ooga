@@ -31,7 +31,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	int cols = 640;
 	int rows = 480;
 	//this->setCropWindowSize(150, 100, 350, 350);  // todo: we could crop heavier
-	this->setCropWindowSize(170, 110, 250, 210);  // todo: we could crop heavier
+	this->setCropWindowSize(170, 110, 250, 210);  // a heavier crop!
 	lambda_ed = 0.02;  // initial guess
 	alpha_ed = 500;  // initial guess
 	//theta = -1;
