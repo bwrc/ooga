@@ -4,7 +4,7 @@
 
 # ÖÖGA specific
 #the executable
-ooga
+ooga.
 
 # skip (huge) video files
 [Vv]ideos/

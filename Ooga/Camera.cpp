@@ -41,7 +41,13 @@ void Camera::setDistortion(const double _dist[5]) {
 
 }
 
+void Camera::setIntrinsicMatrix(const cv::Mat _intr){
+	_intr.copyTo(intrinsic_matrix);
+}
 
+void Camera::setDistortion(const cv::Mat _dist){
+	_dist.copyTo(distortion);
+}
 /*
  *	It is important to notice that u and v are in a 2D coordinate system with the origin at the upper
  *	left corner of the image.
@@ -57,7 +63,6 @@ void Camera::pixToWorld(const std::vector<cv::Point2d> &image_points, std::vecto
 	const double cy = intrinsic_matrix.at<double>(1, 2);
 	const double fx = intrinsic_matrix.at<double>(0, 0);
 	const double fy = intrinsic_matrix.at<double>(1, 1);
-
 
 	std::vector<cv::Point2d> dstv(image_points.size());
 

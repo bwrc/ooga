@@ -39,7 +39,7 @@ public:
 //	void SetCamFeedSource(FrameSrc f);
 
 	//void InitAndConfigure( TSettings *settings );
-	void InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string glintmodel_fn, std::string K9_matrix_fn);
+	void InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string glintmodel_fn, std::string K9_matrix_fn, std::string cam_cal_fn);
 	virtual void Process(cv::UMat* eyeframe,
 			     TTrackingResult* trackres, 
 			     cv::Point3d &pupilCenter3D, 

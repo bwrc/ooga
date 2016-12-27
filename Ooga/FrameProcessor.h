@@ -32,7 +32,9 @@ public:
 //	FrameProcessor(concurrent_queue<std::shared_ptr<TBinocularFrame>>* in,
 //					concurrent_queue<std::shared_ptr<TBinocularFrame>>* out);
 	FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>* in,
-		BalancingQueue<std::shared_ptr<TBinocularFrame>>* out);
+		BalancingQueue<std::shared_ptr<TBinocularFrame>>* out,
+		TSettings* settings);
+
 	~FrameProcessor();
 
 	/**

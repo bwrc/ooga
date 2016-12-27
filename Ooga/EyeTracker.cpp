@@ -25,7 +25,7 @@ EyeTracker::~EyeTracker()
 	}
 }
 
-void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string glintmodel_fn, std::string K9_matrix_fn)
+void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string glintmodel_fn, std::string K9_matrix_fn, std::string cam_cal_fn)
 {
 	//TODO: read these from setting / function params
 	int cols = 640;
@@ -106,14 +106,14 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 			fs_gm["mu_y_left"] >> MU_Y_mat;
 		}
 
-		int N_leds = 6;  // TODO: define this elsewhere
+	int N_leds = 6;  // TODO: define this elsewhere
 
 	for (int i = 0; i < N_leds; i++) {
 		MU_X[i] = MU_X_mat.at<float>(0, i);
 		MU_Y[i] = MU_Y_mat.at<float>(0, i);
 	}
 
-	cv::FileStorage fs("calibration/parameters.yaml", cv::FileStorage::READ);
+	cv::FileStorage fs("../calibration/parameters.yaml", cv::FileStorage::READ);
 	fs["glint_beta"] >> glint_beta;
 	fs["glint_reg_coef"] >> glint_reg_coef;
 	fs["pupil_iterate"] >> pupil_iterate;
@@ -160,31 +160,36 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 
 	///////// END LOADING
 
-	//TODO: Make this make sense
-	//TODO: read these from file, select eye for camera
-
 	eyeCam = new Camera();
 
-	// Vasen ja oikea oli väärin, korjasin. t: Miika
-	if (myEye == FrameSrc::EYE_R){  // NOT: if (myEye == FrameSrc::EYE_L){
-		double eye_intr[9] = { 706.016649148281, 0, 0, 0, 701.594050122496, 0, 325.516892970862, 229.074499749446, 1 };
-		double eye_dist[5] = { -0.0592552807088912, -0.356035882388608, -0.00499637342440711, -0.00186924287347176, 0.041261857952091 };
-		eyeCam->setIntrinsicMatrix(eye_intr);
-		eyeCam->setDistortion(eye_dist);
-	}
-	else { // left eye (NOT right eye)
-		double eye_intr[9] = { 789.311956305243, 0, 0, 0, 785.608590236097, 0, 318.745586281075, 217.585069948245, 1 };
-		double eye_dist[5] = { -0.0683374878811475, -0.57464673534425, 0.00189640729826507, 0.00224588599102401, 0.61174675760327 };
-		eyeCam->setIntrinsicMatrix(eye_intr);
-		eyeCam->setDistortion(eye_dist);
-	}
+	cv::FileStorage camcalfs(cam_cal_fn, cv::FileStorage::READ);
+	cv::Mat eye_intrinsic;// = cv::Mat(3, 3, CV_32F);
+	cv::Mat eye_dist;// = cv::Mat(1, 5, CV_32F);
 
-	// Calibration related stuff
-	//not used? Not used here!
-	//A_rot = (cv::Mat_<float>(3, 3) << A(0, 0), A(0, 1), A(0, 2), A(1, 0), A(1, 1), A(1, 2), A(2, 0), A(2, 1), A(2, 2));
-	//a_tr = (cv::Mat_<float>(3, 1) << A(0, 3), A(1, 3), A(2, 3));
-	//invA_rot;
-	//cv::invert(A_rot, invA_rot, cv::DECOMP_LU);
+	camcalfs["eye_intr"] >> eye_intrinsic;
+	camcalfs["eye_dist"] >> eye_dist;
+
+	eye_intrinsic.convertTo(eye_intrinsic, CV_64F);
+	eye_dist.convertTo(eye_dist, CV_64F);
+
+	std::cout << eye_intrinsic << std::endl;
+
+	eyeCam->setIntrinsicMatrix(eye_intrinsic);
+	eyeCam->setDistortion(eye_dist);
+
+	//these are now read from calibration files above
+	//if (myEye == FrameSrc::EYE_R){  // NOT: if (myEye == FrameSrc::EYE_L){
+	//	double eye_intr[9] = { 706.016649148281, 0, 0, 0, 701.594050122496, 0, 325.516892970862, 229.074499749446, 1 };
+	//	double eye_dist[5] = { -0.0592552807088912, -0.356035882388608, -0.00499637342440711, -0.00186924287347176, 0.041261857952091 };
+	//	eyeCam->setIntrinsicMatrix(eye_intr);
+	//	eyeCam->setDistortion(eye_dist);
+	//}
+	//else { // left eye (NOT right eye)
+	//	double eye_intr[9] = { 789.311956305243, 0, 0, 0, 785.608590236097, 0, 318.745586281075, 217.585069948245, 1 };
+	//	double eye_dist[5] = { -0.0683374878811475, -0.57464673534425, 0.00189640729826507, 0.00224588599102401, 0.61174675760327 };
+	//	eyeCam->setIntrinsicMatrix(eye_intr);
+	//	eyeCam->setDistortion(eye_dist);
+	//}
 
 	glintfinder = new GlintFinder();
 	//TODO: remove hardcoded values like the six here
@@ -199,10 +204,6 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	for (int i = 0; i < 4; i++) {
 	  pupilEllipsePoints_prev_eyecam[i] = cv::Point2d(0, 0);
 	}
-
-
-	//K9_matrix = cv::Mat::eye(3, 3, K9_matrix.type());  // Why, oh why? t: Miika
-
 
 	//TODO: read these from a file (for both eyes)
 
@@ -267,11 +268,6 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 
 	//TODO: just do this for the cropped part?
 	cv::cvtColor((*eyeframe), gray, cv::COLOR_BGR2GRAY);
-
-/*	std::cerr << eyeframe->getMat(cv::ACCESS_READ).size() << std::endl;
-	std::cerr << "pix1: " << int(eyeframe->getMat(cv::ACCESS_READ).at<uchar>(199, 123)) << std::endl;
-	std::cerr << "pix2: " << int(eyeframe->getMat(cv::ACCESS_READ).at<uchar>(198, 124)) << std::endl;
-*/
 
 	pt->addTimeStamp("converted");
 

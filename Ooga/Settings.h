@@ -24,6 +24,7 @@ struct feedSource
 	int feedNumber; //USB cam enumeration
 	std::string calibrationFile;
 	std::string fileName;
+	int flip;
 };
 
 class TSettings
@@ -51,6 +52,16 @@ public:
 	feedSource eyeLeftCam;
 	feedSource eyeRightCam;
 	feedSource sceneCam;
+
+	std::string camerarig_file; //this includes the scene calibration -> should move to cam_scene_file?
+	std::string K9_file;
+	std::string CM_left_file;
+	std::string CM_right_file;
+	std::string glintmodel_file;
+	std::string params_file;
+
+	std::string cam_left_eye_file;
+	std::string cam_right_eye_file;
 
 	int nOfCams = 3;
 

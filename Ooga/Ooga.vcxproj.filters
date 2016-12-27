@@ -51,13 +51,7 @@
     <ClInclude Include="getPupilEllipse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="getPupilEllipsePoints.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GlintFinder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="orderGlints.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="PerformanceTimer.h">
@@ -79,6 +73,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\utils\concurrent_queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\utils\OOGUI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="kalmanFilterGazePoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="getPupilEllipsePoints.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="oogaConstants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -113,16 +119,7 @@
     <ClCompile Include="getPupilCenter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="getPupilEllipse.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="getPupilEllipsePoints.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="GlintFinder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="orderGlints.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PerformanceTimer.cpp">
@@ -138,6 +135,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="VideoWriterNoThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\utils\OOGUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="kalmanFilterGazePoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="getPupilEllipsePoints.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

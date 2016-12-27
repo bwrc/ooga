@@ -1,0 +1,27 @@
+=============
+glfw3
+=============
+apt install libglfw3-dev (?)
+http://www.glfw.org/docs/latest/compile_guide.html
+
+=============
+GLEW
+=============
+'$ sudo apt-get install build-essential libxmu-dev libxi-dev libgl-dev libosmesa-dev'
+download latest release package from http://glew.sourceforge.net/index.html
+(the git version has additional problems in building)
+cd build
+cmake ./cmake
+make -j4
+sudo make install
+
+=============
+glm
+=============
+Download:
+http://glm.g-truc.net/0.9.8/index.html
+cmake .
+sudo make install
+
+There's a Ubuntu-specific Boost bug with program options used to parse the inputs -> use Boost 1.60
+http://stackoverflow.com/questions/35382902/boost-program-options-throws-character-conversion-failed

@@ -291,7 +291,9 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 
 	if (DO_PERF_T) pt->addTimeStamp("k-loop");
 
-	for (int j = 0; j < N_leds; j++) { //!! please explain this bit?
+	//enumerate ORDERS permutations, such that the sequences 123456, 234561, 345612, ...
+	//move outside
+	for (int j = 0; j < N_leds; j++) { 
 		for (int n = 0; n < N_leds - j; n++) {
 			ORDERS[j][n] = n + j;
 		}
@@ -509,7 +511,6 @@ std::vector<cv::Point2d> GlintFinder::getGlints(cv::UMat eyeImage_diff, cv::Poin
 					log_prior = log_lhood * 0;
 				}
 */
-
 
 				// Compute the logarithm of posterior distribution
 				cv::Mat log_post = log_prior + log_lhood;
@@ -1074,18 +1075,6 @@ std::vector<cv::Point2d> GlintFinder::getGlints_old_not_scale_invariant(cv::UMat
 		//glintPoints.push_back(glintPoint);
 		glintPoints.push_back(cv::Point2d(glints_x[best_particle][i], glints_y[best_particle][i]));
 	}
-
-	/*
-	if (0) {  // Plot the result?
-	cv::Mat eyeImage_clone = eyeImage_diff.clone();
-	//Point2d pupilCenterPoint; pupilCenterPoint.x = pupil_center.x; pupilCenterPoint.y = pupil_center.y;
-	circle(eyeImage_clone, pupil_center, 6, 250, -1, 8); imshow("result", eyeImage_clone);
-	for (int i = 0; i<6; i++) {
-	circle(eyeImage_clone, glintPoints[i], 6, 250, 3, 8); imshow("result", eyeImage_clone);
-	}
-	waitKey(0);
-	}
-	*/
 
 	if (DO_PERF_T) pt->addTimeStamp("the rest");
 
