@@ -108,18 +108,16 @@ int _tmain(int argc, _TCHAR* argv[])
   grabber->setSaveState(true);
 
   FrameProcessor* processor = new FrameProcessor(processQueue, visualizationQueue, settings);
-  std::cout << "PROCESSOR CREATED" << std::endl;
 
   //setup cameras
   //The cams vector should be populated in the order:
   // [0] : right, [1] : left, [2] : scene
-  // now scene, left, right...?
   std::vector<cv::VideoCapture *> cams;
   std::vector<int> flipCodes;
   for (int i = 0; i < 3; i++){
     cams.push_back(new cv::VideoCapture());
-	//should probably iterate through children of xml file cameras, but for now, assign indexes:
 
+	//should probably iterate through children of xml file cameras, but for now, assign indexes:
 	//RIGHT EYE CAM
 	if (i == 0){
 		if (settings->eyeRightCam.type == 0){ //camera
@@ -214,6 +212,7 @@ int _tmain(int argc, _TCHAR* argv[])
   OOGUI* oogui = new OOGUI();
   oogui->Initialize();
   oogui->SetCallBackFunction( ModeCallBack );
+	oogui->SetCalibrationCallback( std::bind(&FrameProcessor::calibrationCallback, processor, std::placeholders::_1, std::placeholders::_2));
 /*=======
   cv::namedWindow(wn0, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
   cv::namedWindow(wn1, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);

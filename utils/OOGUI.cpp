@@ -476,8 +476,8 @@ void OOGUI::mouseButtonFun( int button, int action, int mods)
 
 			//		sx = fmod(x, hw) / float(hw) * 640;
 			//		sy = fmod(y, hh) / float(hh) * 480;
-
-			std::cout << "add calib sample: " << sx << ", " << sy << std::endl;
+			calCallback(sx, sy);
+			//std::cout << "add calib sample: " << sx << ", " << sy << std::endl;
 
 			//todo: addCalibrationSample(sx, sy);
 		}
@@ -488,6 +488,11 @@ void OOGUI::mouseButtonFun( int button, int action, int mods)
 void OOGUI::SetCallBackFunction(std::function<void(RunningModes mode, bool value)> callback){
 	modeCallBack = callback;
 }
+
+void OOGUI::SetCalibrationCallback( std::function<void(double x, double y)> cal_callback){
+	calCallback = cal_callback;
+}
+
 
 void OOGUI::key_callback(int key, int scancode, int action, int mods)
 {

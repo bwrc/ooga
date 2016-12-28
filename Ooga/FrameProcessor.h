@@ -46,6 +46,8 @@ public:
 
 	void Process();
 
+	void calibrationCallback( double x, double y);
+
 private:
 //	concurrent_queue<std::shared_ptr<TBinocularFrame>>* qIn;
 //	concurrent_queue<std::shared_ptr<TBinocularFrame>>* qOut;

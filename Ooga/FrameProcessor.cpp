@@ -394,7 +394,7 @@ void FrameProcessor::Process()
 	  my_mtx.unlock();
 
 	  msecs frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
-	  //std::cout << frameTime.count() << std::endl;  // print the computation time
+	  std::cout << frameTime.count() << std::endl;  // print the computation time
 			
 	}
 
@@ -402,8 +402,6 @@ void FrameProcessor::Process()
 	msecs waitTime = msecs(30) - frameTime2;
 
 	//std::cout << "frametime: " << frameTime2.count() << std::endl;
-
-
 
 	if (waitTime > msecs(0)){
 	  std::this_thread::sleep_for(waitTime);
@@ -419,3 +417,9 @@ void FrameProcessor::Process()
     }
 
 }
+
+void FrameProcessor::calibrationCallback( double x, double y)
+{
+	std::cout << "fp would add " << x << ", " << y << std::endl;
+}
+
