@@ -32,6 +32,8 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye,
 																	std::string LED_pos_fn,
 																	cv::Rect cropWindow)
 {
+
+
 	//TODO: read all these from setting / function params:
 	int cols = 640;
 	int rows = 480;
@@ -85,7 +87,6 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye,
 		}
 	}
 	cv::normalize(pupil_kernel2, pupil_kernel2, 1, 0, cv::NORM_L1);
-
 	// Create a custom distance-based kernel for filtering glints
 	int glint_kernel_radius = 2; // Approximative glint kernel
 	glint_kernel = cv::Mat::ones(2 * glint_kernel_radius + 1, 2 * glint_kernel_radius + 1, CV_32F);
@@ -95,12 +96,14 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye,
 		}
 	}
 	cv::normalize(glint_kernel, glint_kernel, 1, 0, cv::NORM_L1);
-
 	///// LOAD THE GLINT MODEL (MU and CM)
 	// Mean of the glint model
 	float MU_X[6], MU_Y[6], MU_X2[6], MU_Y2[6];
 	cv::Mat MU_X_mat, MU_Y_mat, MU_X2_mat, MU_Y2_mat;
+
 	cv::FileStorage fs_gm(glintmodel_fn, cv::FileStorage::READ);
+
+
 	if (myEye == FrameSrc::EYE_R) {
 	  fs_gm["mu_x_right"] >> MU_X_mat;
 	  fs_gm["mu_y_right"] >> MU_Y_mat;
@@ -109,7 +112,7 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye,
 	  fs_gm["mu_x_left"] >> MU_X_mat;
 	  fs_gm["mu_y_left"] >> MU_Y_mat;
 	}
-	
+
 	int N_leds = 6;  // TODO: define this elsewhere
 
 	for (int i = 0; i < N_leds; i++) {

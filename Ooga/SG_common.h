@@ -24,7 +24,7 @@ struct TTrackingResult{
 
 	std::vector<cv::Point2d> glintPoints;
 	cv::Point3d corneaCenter3D;
-	cv::Point3d gazeDirectionVector;
+  cv::Point3d gazeDirectionVector;  // turha nykyään... t: Miika
 
 	double score;
 

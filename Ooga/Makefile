@@ -1,13 +1,13 @@
 # compiler flags
 CC=g++
-INC_DIRS= -I../ -I/usr/local/include/eigen3 -I/usr/local/include/
+#INC_DIRS= -I../ -I/usr/local/include/eigen3 -I/usr/local/include/
 #INC_DIRS= -I../ -I/usr/local/include/ -I/usr/local/include/eigen3 -Iboost_dir
-#INC_DIRS= -I../ -I/usr/local/include/ -Ieigen_dir -Iboost_dir
+INC_DIRS= -I../ -I/usr/local/include/ -Ieigen_dir -Iboost_dir
 #INCS=$(foreach d, $INC_DIR, -I$d)
 CFLAGS = -c -std=c++11 $(INC_DIRS) -Wfatal-errors #-Wall
-LDFLAGS= -L/usr/local/lib/boost/ -L/usr/local/lib/ -L/usr/local/eigen3
+#LDFLAGS= -L/usr/local/lib/boost/ -L/usr/local/lib/ -L/usr/local/eigen3
 #LDFLAGS= -Lboost_dir/stage/lib -L/usr/local/lib/ -L/usr/local/eigen3
-#LDFLAGS= -Lboost_dir/stage/lib -L/usr/local/lib/
+LDFLAGS= -Lboost_dir/stage/lib -L/usr/local/lib/
 SOURCES= Camera.cpp FrameRateLimiter.cpp \
 VideoIOHandler.cpp Cornea_computer.cpp \
 PerformanceTimer.cpp VideoWriterNoThread.cpp \
@@ -33,7 +33,7 @@ $(EXECUTABLE): $(OBJECTS)
 
 pkgconf: $(EXECUTABLE)
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ `pkg-config opencv gsl glfw3 --cflags --libs`  $(LIBS_pthread) $(LIBS_boost) $(LIBS_GL) -O3
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ `pkg-config opencv gsl glfw3 --cflags --libs`  $(LIBS_pthread) $(LIBS_boost) $(LIBS_GL)
 #	$(CC) $(LDFLAGS) $(OBJECTS) -o $@ `pkg-config opencv gsl glfw3 eigen3 --cflags --libs`  $(LIBS_pthread) $(LIBS_boost) $(LIBS_GL)
 
 .cpp.o:

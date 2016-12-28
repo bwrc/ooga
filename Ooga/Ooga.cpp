@@ -50,7 +50,6 @@ void ModeCallBack(RunningModes mode, bool value){
 		break;
 	case (OOGA_MODE_RUNNING) :
 		std::cout << "RUN" << std::endl;
-
 		break;
 	case (OOGA_MODE_PAUSED) :
 		std::cout << "PAUSE" << std::endl;
@@ -88,6 +87,7 @@ int _tmain(int argc, _TCHAR* argv[])
     std::cout << "invalid command line -> exit" << std::endl;
     return 0;
   }
+
   settings->loadSettings(settings->configFile);
 
   /* SET UP queues, threads, etc.  =======================================================================*/
