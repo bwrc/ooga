@@ -306,10 +306,11 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
 
   pupilEllipse = pupilestimator->getPupilEllipse(opened.getMat(cv::ACCESS_READ), pupil_center, pupil_kernel2, pupil_element, pupil_iterate, pupil_beta);
 
+  pt->addTimeStamp("pupilellipse");
+
   //TODO move this to pupilestimator for cleansiness?
   cv::Point2d pupilEllipsePoints[4];  // There are four endpoints in an ellipse's axes
   getPupilEllipsePoints(pupilEllipse, pupilEllipsePoints_prev_eyecam, double(theta), &pupilEllipsePoints[0]);
-
 	
   for (int i=0; i<4; i++)  {  // Loop the four endpoints of the ellipse's axes
     pupilEllipsePoints_prev_eyecam[i] = pupilEllipsePoints[i];
@@ -326,6 +327,8 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
     eyeCam->pixToWorld(pupilEllipsePoints[i].x, pupilEllipsePoints[i].y, pupilEllipsePoint3d);
     pupilEllipsePoints3d.push_back(pupilEllipsePoint3d);
   }
+
+  pt->addTimeStamp("pupilpoints");
 
   const double gx_guess = 0.01;  // Insert something slightly positive here as otherwise the local solution may be at wrong side of the camera!
   std::vector<double> guesses(6, gx_guess);
@@ -355,8 +358,12 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
   }
   Cc3d.x = eigCenter(0); Cc3d.y = eigCenter(1); Cc3d.z = eigCenter(2);
 
+  pt->addTimeStamp("CC3D");
+
   /// Compute the 3D pupil center
   Pc3d = computePupilCenter3d(pupilEllipsePoints3d, Cc3d);
+
+  pt->addTimeStamp("PC3D");
 
   /// Compute the pupil-corneal distance vector ("gaze vector") and correct it with K9
   cv::Point3f optical_vector = (Pc3d - Cc3d) / float(cv::norm(Pc3d - Cc3d));
@@ -379,6 +386,6 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
   //TODO: insert tracking results to frame, visualize in main thread
 
   pt->addTimeStamp("draw");
-  //pt->dumpTimeStamps(std::cout);
+  pt->dumpTimeStamps(std::cout);
 
 }
