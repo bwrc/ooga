@@ -47,6 +47,15 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 	cv::cv2eigen(A_r2s_temp, A_r2s);
 	cv::cv2eigen(A_l2r_temp, A_l2r);
 
+
+	// Calibration related stuff
+	A_rot = (cv::Mat_<double>(3,3) << A_r2s(0,0), A_r2s(0,1), A_r2s(0,2), A_r2s(1,0), A_r2s(1,1), A_r2s(1,2), A_r2s(2,0), A_r2s(2,1), A_r2s(2,2) );
+	a_tr = (cv::Mat_<double>(3,1) << A_r2s(0,3), A_r2s(1,3), A_r2s(2,3) );
+	cv::invert(A_rot, invA_rot, cv::DECOMP_SVD);
+
+
+
+
 	pauseWorking = false;
 
 	//ptimer = new TPerformanceTimer();
@@ -146,6 +155,7 @@ void FrameProcessor::Process()
 	  cv::Point3d pupilCenter3DR, corneaCenter3DR;
 	  double thetaL, thetaR;
 
+	  /// Miikan muutos:
 	  TTrackingResult* resL = new TTrackingResult;
 	  TTrackingResult* resR = new TTrackingResult;
 
@@ -192,7 +202,7 @@ void FrameProcessor::Process()
 	  cv::Point3d K9_times_optical_vector_point_R(K9_times_optical_vector_mat_R);//.at<float>(0), K9_times_optical_vector_mat_R.at<float>(1), K9_times_optical_vector_mat_R.at<float>(2));
 	  gazeVectorR = K9_times_optical_vector_point_R / cv::norm(K9_times_optical_vector_point_R);
 
-	  bool blinking = 1;
+	  bool blinking = true;  // don't change this!
 	  if (resR->score + resL->score > 0.7) {  // good scores --> not blinking
 	    blinking = 0;
 	  }
@@ -340,7 +350,7 @@ void FrameProcessor::Process()
 	  // Draw the pog in the scene image. Adjust its size according to the glint fit score (of the "best camera"!).
 	  cv::circle(*sceneImage, pog_scam, 35 * (1 - best_score) + 5, cv::Scalar(0, 0, 250), 7, 8);
 	  
-	  if (blinking) {  // TODO: Why it never blinks?
+	  if (blinking) {
 	    cv::putText(*sceneImage, "BLINK ", cv::Point2d(100, 300), CV_FONT_HERSHEY_PLAIN, 10, CV_RGB(250, 0, 100), 5);
 	  }
 	  if (!using_both_eyes) { // print text, if only other eye is used?
@@ -394,8 +404,19 @@ void FrameProcessor::Process()
 	  my_mtx.unlock();
 
 	  msecs frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
-	  std::cout << frameTime.count() << std::endl;  // print the computation time
-			
+	  //std::cout << frameTime.count() << std::endl;  // print the computation time
+	
+
+	  // Save these into the  class variables, to be (possibly) used in the user calibration
+	  corneaCenter3D_left = resL->corneaCenter3D;
+	  pupilCenter3D_left = resL->pupilCenter3D;
+	  corneaCenter3D_right = resR->corneaCenter3D;
+	  pupilCenter3D_right = resR->pupilCenter3D;
+	  if (!blinking && using_both_eyes) {
+	    calibration_sample_ok = true; }
+	  else {
+	    calibration_sample_ok = false; }
+
 	}
 
 	msecs frameTime2 = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
@@ -420,6 +441,70 @@ void FrameProcessor::Process()
 
 void FrameProcessor::calibrationCallback( double x, double y)
 {
-	std::cout << "fp would add " << x << ", " << y << std::endl;
+
+  if (!calibration_sample_ok) { // Not a good sample (not using both eyes or blinking) ---> don't use
+    std::cout << "Bad sample! Not to be used for calibration..." << std::endl;
+    return; }
+
+
+  if (N_cal_points == 0) {   // set these as unity matrices in the beginning (but this could be done elsewhere...):
+    K9_left = cv::Mat::eye(3,3, K9_left.type());
+    K9_right = cv::Mat::eye(3,3, K9_right.type());
+  }
+
+  N_cal_points++;
+
+  int Shori = 640;  // TODO: define elsewhere!
+  int Svert = 480;  // TODO: define elsewhere!
+  double gaze_dist = 1.0;  // TODO: define elsewhere!
+  cv::Point3d target3D;
+  cv::Mat tmp;
+
+  //std::cout << "fp would add " << x << ", " << y << std::endl;
+
+  double mouse_X = double(Shori) - x;  // Our scene camera is upside down
+  double mouse_Y = double(Svert) - y;
+
+  sceneCam->pixToWorld(mouse_X, mouse_Y, target3D);
+  target3D = target3D * gaze_dist;
+
+  cv::Mat target3D_mat(target3D);
+  tmp = target3D_mat.t();
+  target3D_calpoints.push_back(tmp);
+
+
+  cv::Mat corneaCenter3D_left_mat(corneaCenter3D_left);
+  tmp = corneaCenter3D_left_mat.t();
+  corneaCenter3D_left_calpoints.push_back(tmp);
+
+  cv::Mat pupilCenter3D_left_mat(pupilCenter3D_left);
+  cv::Mat opticalVector_left_mat = (pupilCenter3D_left_mat - corneaCenter3D_left_mat) / cv::norm((pupilCenter3D_left_mat - corneaCenter3D_left_mat));
+  tmp = opticalVector_left_mat.t();
+  opticalVector_left_calpoints.push_back(tmp);
+
+
+  cv::Mat corneaCenter3D_right_mat(corneaCenter3D_right);
+  tmp = corneaCenter3D_right_mat.t();
+  corneaCenter3D_right_calpoints.push_back(tmp);
+
+  cv::Mat pupilCenter3D_right_mat(pupilCenter3D_right);
+  cv::Mat opticalVector_right_mat = (pupilCenter3D_right_mat - corneaCenter3D_right_mat) / cv::norm((pupilCenter3D_right_mat - corneaCenter3D_right_mat));
+  tmp = opticalVector_right_mat.t();
+  opticalVector_right_calpoints.push_back(tmp);
+
+
+  if (N_cal_points >= 3) {  // When we have at least 3 samples, we can calibrate (as the matrices invert)
+    cv::Mat a_tr_rep = cv::repeat(a_tr, 1, N_cal_points);
+    cv::Mat invL_left, invL_right;  // inverses of the 'L' vectors (i.e., of the optical vectors)
+
+    cv::invert(opticalVector_left_calpoints.t(), invL_left, cv::DECOMP_SVD);
+    K9_left = 1.0 / gaze_dist * (invA_rot * (target3D_calpoints.t() - a_tr_rep) - corneaCenter3D_left_calpoints.t()) * invL_left;
+
+    cv::invert(opticalVector_right_calpoints.t(), invL_right, cv::DECOMP_SVD);
+    K9_right = 1.0 / gaze_dist * (invA_rot * (target3D_calpoints.t() - a_tr_rep) - corneaCenter3D_right_calpoints.t()) * invL_right;
+  }
+
+  std::cout << N_cal_points << " calibration samples collected ... " << std::endl;
+
 }
 

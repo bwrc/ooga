@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <iostream>
 
-//#define GSL_MULTIFIT_FDFSOLVER_J
+#define GSL_MULTIFIT_FDFSOLVER_J
 
 namespace ooga {
 

@@ -70,7 +70,7 @@ private:
 	//resulting in "expected a type specifier" error with Eigen::MatrixXd A(4,4) and cv::Mat A(3,3,CV_32F)
 	//while can't find, this seems to be ok:
 	//Eigen::MatrixXd A = Eigen::MatrixXd(4, 4);  // This is the matrix that transforms (augmented) coordinates from the eye camera to the scene camera
-	Eigen::MatrixXd A_l2s = Eigen::MatrixXd(4, 4);  // This is the matrix that transforms (augmented) coordinates from the eye camera to the scene camera
+	//Eigen::MatrixXd A_l2s = Eigen::MatrixXd(4, 4);  // This is the matrix that transforms (augmented) coordinates from the eye camera to the scene camera (useless)
 	Eigen::MatrixXd A_r2s = Eigen::MatrixXd(4, 4);  // This is the matrix that transforms (augmented) coordinates from the eye camera to the scene camera
 	Eigen::MatrixXd A_l2r = Eigen::MatrixXd(4, 4);  // the transformation from left eye camera to the right eye camera
 
@@ -95,6 +95,24 @@ private:
 	double loc_variance;
 	double kalman_R_max; // Maximum variance for the observation noise. The larger this is, the less the observations are trusted.
 	double theta_mean; // theta_mean is averaged over L and R
+
+
+	//// User calibration related:
+
+	cv::Point3d corneaCenter3D_left;
+	cv::Point3d pupilCenter3D_left;
+	cv::Point3d corneaCenter3D_right;
+	cv::Point3d pupilCenter3D_right;
+
+	cv::Mat target3D_calpoints = cv::Mat::ones(0, 3, CV_64F);
+	cv::Mat corneaCenter3D_left_calpoints = cv::Mat::ones(0, 3, CV_64F);
+	cv::Mat opticalVector_left_calpoints = cv::Mat::ones(0, 3, CV_64F);
+	cv::Mat corneaCenter3D_right_calpoints = cv::Mat::ones(0, 3, CV_64F);
+	cv::Mat opticalVector_right_calpoints = cv::Mat::ones(0, 3, CV_64F);
+
+	cv::Mat A_rot, a_tr, invA_rot;
+	int N_cal_points = 0;
+	bool calibration_sample_ok;
 };
 
 #endif
