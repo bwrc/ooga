@@ -24,13 +24,20 @@ EyeTracker::~EyeTracker()
 	}
 }
 
-void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string glintmodel_fn, std::string K9_matrix_fn, std::string cam_cal_fn)
+void EyeTracker::InitAndConfigure(FrameSrc myEye, 
+                                  std::string CM_fn, 
+																	std::string glintmodel_fn, 
+																	std::string K9_matrix_fn, 
+																	std::string cam_cal_fn,
+																	std::string LED_pos_fn,
+																	cv::Rect cropWindow)
 {
 	//TODO: read all these from setting / function params:
 	int cols = 640;
 	int rows = 480;
 	//this->setCropWindowSize(150, 100, 350, 350);  // todo: we could crop heavier
-	this->setCropWindowSize(170, 110, 250, 210);  // a heavier crop!
+	//this->setCropWindowSize(170, 110, 250, 210);  // a heavier crop!
+	this->setCropWindowSize(cropWindow.x, cropWindow.y, cropWindow.width, cropWindow.height);
 	lambda_ed = 0.02;  // initial guess
 	alpha_ed = 500;  // initial guess
 	weight = 0.7;
@@ -180,45 +187,22 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye, std::string CM_fn, std::string
 	  pupilEllipsePoints_prev_eyecam[i] = cv::Point2d(0, 0);
 	}
 
-	//TODO: read these from a file (for both eyes)
-
-	//// Set the LED positions (CONSTANT)
-	Eigen::Vector3d eigLED;
-	if (myEye == FrameSrc::EYE_L){
-	  // Optics based measures:
-	  // eigLED << 0.019120, 0.001719, 0.029388; led_pos.push_back(eigLED);
-	  // eigLED << 0.039017, -0.005938, 0.030353; led_pos.push_back(eigLED);
-	  // eigLED << 0.038431, -0.022589, 0.036882; led_pos.push_back(eigLED);
-	  // eigLED << 0.004518, -0.027402, 0.042179; led_pos.push_back(eigLED);
-	  // eigLED << -0.021734, -0.015592, 0.040242; led_pos.push_back(eigLED);
-	  // eigLED << -0.015582, -0.003276, 0.034835; led_pos.push_back(eigLED);
-	  
-	  // 3D model based measures:
-	  eigLED << 0.017532, 0.000711, 0.016758,    led_pos.push_back(eigLED);
-	  eigLED << 0.036076, -0.007606, 0.020288,   led_pos.push_back(eigLED);
-	  eigLED << 0.036076, -0.025013, 0.027677,   led_pos.push_back(eigLED);
-	  eigLED << 0.004206, -0.033251, 0.031174,   led_pos.push_back(eigLED);
-	  eigLED << -0.023768, -0.021550, 0.026207,  led_pos.push_back(eigLED);
-	  eigLED << -0.016759, -0.007479, 0.020235,  led_pos.push_back(eigLED);
-
+  //Read LED positions
+	cv::FileStorage LEDpos_fs(LED_pos_fn, cv::FileStorage::READ);
+	cv::Mat ledpmat;
+	switch (myEye ){
+		case FrameSrc::EYE_L:
+		LEDpos_fs["left_leds"] >> ledpmat;
+		break;
+		default: //right
+		LEDpos_fs["right_leds"] >> ledpmat;
+		break;
 	}
-	else if (myEye == FrameSrc::EYE_R) { // new right eye
-	  // Optics based measures:
-	  // eigLED << -0.020094, 0.002253, 0.017040; led_pos.push_back(eigLED);
-	  // eigLED << -0.038540, -0.005842, 0.017673; led_pos.push_back(eigLED);
-	  // eigLED << -0.038744, -0.023562, 0.026000; led_pos.push_back(eigLED);
-	  // eigLED << -0.003747, -0.026598, 0.033479; led_pos.push_back(eigLED);
-	  // eigLED << 0.022498, -0.016365, 0.033184; led_pos.push_back(eigLED);
-	  // eigLED << 0.017009, -0.005323, 0.027025; led_pos.push_back(eigLED);
-
-	  // 3D model based measures:
-	  eigLED << -0.017532, 0.000711, 0.016758,   led_pos.push_back(eigLED);   
-	  eigLED << -0.036076, -0.007606, 0.020288,  led_pos.push_back(eigLED);   
-	  eigLED << -0.036076, -0.025013, 0.027677,  led_pos.push_back(eigLED);   
-	  eigLED << -0.004206, -0.033251, 0.031174,  led_pos.push_back(eigLED);   
-	  eigLED << 0.023768, -0.021550, 0.026207,   led_pos.push_back(eigLED);   
-	  eigLED << 0.016759, -0.007479, 0.020235,   led_pos.push_back(eigLED);
-      
+	for(int i=0; i < ledpmat.rows; ++i){
+		Eigen::Vector3d tmp;
+		tmp << ledpmat.at<float>(i,0), ledpmat.at<float>(i,1), ledpmat.at<float>(i,2);
+		std::cout << tmp << std::endl;
+		led_pos.push_back(tmp);
 	}
 
 }

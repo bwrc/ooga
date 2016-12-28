@@ -59,6 +59,7 @@ public:
 	std::string CM_right_file;
 	std::string glintmodel_file;
 	std::string params_file;
+	std::string LED_pos_file;
 
 	std::string cam_left_eye_file;
 	std::string cam_right_eye_file;

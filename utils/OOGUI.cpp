@@ -532,6 +532,17 @@ void OOGUI::key_callback(int key, int scancode, int action, int mods)
 		case GLFW_KEY_3:
 			SetLayout(3);
 			break;
+/*		setting crop windows per eye, 9 = left, 0 = right
+		case GLFW_KEY_9:
+			modeCallBack( OOGA_MODE_SETCROP_LEFT, true);
+			break;
+		case GLFW_KEY_0:
+			modeCallBack( OOGA_MODE_SETCROP_RIGHT, true);
+			break;
+		case GLFW_KEY_LEFT:
+			if 
+		case GLFW_KEY_RIGHT:
+*/
 		default:
 			std::cout << "unknown key: " << key << std::endl;
 		}

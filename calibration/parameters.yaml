@@ -4,3 +4,13 @@ glint_reg_coef: 1
 pupil_iterate: 0
 pupil_beta: 20
 kalman_R_max: 100
+
+crop_left_x: 170
+crop_left_y: 110
+crop_left_w: 250
+crop_left_h: 210
+
+crop_right_x: 170
+crop_right_y: 110
+crop_right_w: 250
+crop_right_h: 210
