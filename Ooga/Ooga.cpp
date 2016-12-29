@@ -70,6 +70,9 @@ int _tmain(int argc, _TCHAR* argv[])
 {
   /* SET PROGRAM OPTIONS, PATHS ETC.======================================================================*/
 
+  std::cout << cv::getBuildInformation() << std::endl;
+  std::cin.ignore();
+
   // TODO these should be configurable without compiling -> read settings first
   //disable OpenCL to avoid the stutters
   putenv("OPENCV_OPENCL_RUNTIME=qqq");
@@ -166,10 +169,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 		flipCodes.push_back(settings->sceneCam.flip);
 	}
-	////if (!cams[i]->open("../videos/sg01_cam" + std::to_string(i + 1) + ".mjpg")) {
-    ////  std::cout << "Could not open video file" << std::endl;
-    ////  break;
-    ////}
 
     cams[i]->set(cv::CAP_PROP_FRAME_WIDTH, 640);
     cams[i]->set(cv::CAP_PROP_FRAME_HEIGHT, 480);
@@ -178,49 +177,13 @@ int _tmain(int argc, _TCHAR* argv[])
     //the enum(i) -> which might be undefined (while it shouldn't)
     int ret = grabber->AddCamera(FrameSrc(i), cams[i], flipCodes[i]);
     std::cout << ret;
-    /*		switch (i){
-		case 0:
-		grabber->AddCamera(FrameSrc::SCENE, cams.at(i));// [i]);
-		break;
-		case 1:
-		grabber->AddCamera(FrameSrc::EYE_L, cams[i]);
-		break;
-		case 2:
-		grabber->AddCamera(FrameSrc::EYE_R, cams[i]);
-		break;
-		}
-    */
-    // (int)FrameSrc(i)]);
-    // TODO addcamera doesn't use the frame identifier, just pushes them in order called, how should this work to get the right feed to the right tracker?
   }
-
-  std::cout << "AFTER CAM ADD" << std::endl;
-
-  //setup cv windows
-/*  std::string wn0 = "cam0 | scene";
-  std::string wn1 = "cam1 | left";
-  std::string wn2 = "cam2 | right";
-
-  cv::namedWindow(wn0, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
-  cv::namedWindow(wn1, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
-  cv::namedWindow(wn2, cv::WINDOW_NORMAL);// WINDOW_OPENGL);
-  cv::moveWindow(wn2, 10, 500);
-  cv::moveWindow(wn1, 650, 500);
-  cv::moveWindow(wn0, 330, 50);
-*/
 
   OOGUI* oogui = new OOGUI();
   oogui->Initialize();
   oogui->SetCallBackFunction( ModeCallBack );
 	oogui->SetCalibrationCallback( std::bind(&FrameProcessor::calibrationCallback, processor, std::placeholders::_1, std::placeholders::_2));
-/*=======
-  cv::namedWindow(wn0, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
-  cv::namedWindow(wn1, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
-  cv::namedWindow(wn2, cv::WINDOW_AUTOSIZE);// WINDOW_OPENGL);
-  cv::moveWindow(wn2, 110, 500); // Lisäsin 100 x-suuntaan t: Miika
-  cv::moveWindow(wn1, 750, 500);
-  cv::moveWindow(wn0, 430, 50);
-*/
+
   bool stopThisNonsense = false;
   bool displayStats = true;
 

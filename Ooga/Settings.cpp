@@ -158,6 +158,7 @@ void TSettings::loadSettings(std::string filename)
 	params_file = tree.get<std::string>("settings.calibration.parameters.<xmlattr>.filename", "../calibration/parameters.yaml");
 	cam_left_eye_file = tree.get<std::string>("settings.calibration.cam_lefteye.<xmlattr>.filename", "../calibration/eye_cam_left.yaml");
 	cam_right_eye_file = tree.get<std::string>("settings.calibration.cam_righteye.<xmlattr>.filename", "../calibration/eye_cam_right.yaml");
+	LED_pos_file = tree.get<std::string>("settings.calibration.led_positions.<xmlattr>.filename", "../calibration/LED_positions.model.yaml");
 }
 
 void TSettings::saveSettings(std::string filename)

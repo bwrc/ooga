@@ -23,9 +23,25 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 	etLeft = new EyeTracker();
 	etRight = new EyeTracker();
 
-	etLeft->InitAndConfigure(FrameSrc::EYE_L, settings->CM_left_file, settings->glintmodel_file, settings->K9_file, settings->cam_left_eye_file);
-	etRight->InitAndConfigure(FrameSrc::EYE_R, settings->CM_right_file, settings->glintmodel_file, settings->K9_file, settings->cam_right_eye_file);
+	cv::FileStorage fs_params(settings->params_file, cv::FileStorage::READ);
 
+	cv::Rect cropLeft;
+	cv::Rect cropRight;
+
+	fs_params["crop_left_x"] >> cropLeft.x;
+	fs_params["crop_left_y"] >> cropLeft.y;
+	fs_params["crop_left_w"] >> cropLeft.width;
+	fs_params["crop_left_h"] >> cropLeft.height;
+
+	fs_params["crop_right_x"] >> cropRight.x;
+	fs_params["crop_right_y"] >> cropRight.y;
+	fs_params["crop_right_w"] >> cropRight.width;
+	fs_params["crop_right_h"] >> cropRight.height;
+
+	etLeft->InitAndConfigure(FrameSrc::EYE_L, settings->CM_left_file, settings->glintmodel_file, settings->K9_file, settings->cam_left_eye_file, settings->LED_pos_file, cropLeft);
+	etRight->InitAndConfigure(FrameSrc::EYE_R, settings->CM_right_file, settings->glintmodel_file, settings->K9_file, settings->cam_right_eye_file, settings->LED_pos_file, cropRight);
+
+	fs_params["kalman_R_max"] >> kalman_R_max;
 
 	//cv::FileStorage fs(K9_matrix_fn, cv::FileStorage::READ);
 	cv::FileStorage fs(settings->K9_file, cv::FileStorage::READ);
@@ -73,9 +89,6 @@ FrameProcessor::FrameProcessor(BalancingQueue<std::shared_ptr<TBinocularFrame>>*
 
 	sceneCam->setIntrinsicMatrix(scene_intrinsic);
 	sceneCam->setDistortion(scene_dist);
-
-	cv::FileStorage fs2(settings->params_file, cv::FileStorage::READ);
-	fs2["kalman_R_max"] >> kalman_R_max;
 
 	//param_est = cv::Mat_<double>(4, 1) << pog_scam.x, pog_scam.y, 0, 0;
 	param_est = cv::Mat::zeros(4,1, CV_64F);

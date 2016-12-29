@@ -41,6 +41,7 @@
 		<CM_left filename="../calibration/file_CM_left"/>
 		<CM_right filename="../calibration/file_CM_right"/>
 		<parameters filename="../calibration/parameters.yaml"/>
+		<led_positions filename="../calibration/LED_positions_model.yaml"/>
 	</calibration>
 
 	<!--
