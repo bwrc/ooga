@@ -9,7 +9,7 @@
 
 #include "kalmanFilterGazePoint.h"
 
-#define DEFAULT_GAZE_DISTANCE 1.2
+#define DEFAULT_GAZE_DISTANCE 1.0
 
 //FrameProcessor::FrameProcessor(concurrent_queue<std::shared_ptr<TBinocularFrame>>* in,
 //	concurrent_queue<std::shared_ptr<TBinocularFrame>>* out)
@@ -467,7 +467,7 @@ void FrameProcessor::calibrationCallback( double x, double y)
 
   int Shori = 640;  // TODO: define elsewhere!
   int Svert = 480;  // TODO: define elsewhere!
-  double gaze_dist = 1.0;  // TODO: define elsewhere!
+  double gaze_dist = DEFAULT_GAZE_DISTANCE;  // TODO: define elsewhere!
   cv::Point3d target3D;
   cv::Mat tmp;
 
