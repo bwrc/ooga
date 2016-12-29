@@ -204,7 +204,6 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye,
 	for(int i=0; i < ledpmat.rows; ++i){
 		Eigen::Vector3d tmp;
 		tmp << ledpmat.at<float>(i,0), ledpmat.at<float>(i,1), ledpmat.at<float>(i,2);
-		std::cout << tmp << std::endl;
 		led_pos.push_back(tmp);
 	}
 
@@ -386,6 +385,6 @@ void EyeTracker::Process(cv::UMat* eyeframe, TTrackingResult* trackres, cv::Poin
   //TODO: insert tracking results to frame, visualize in main thread
 
   pt->addTimeStamp("draw");
-  pt->dumpTimeStamps(std::cout);
+  // pt->dumpTimeStamps(std::cout);
 
 }

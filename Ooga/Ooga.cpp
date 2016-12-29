@@ -70,8 +70,8 @@ int _tmain(int argc, _TCHAR* argv[])
 {
   /* SET PROGRAM OPTIONS, PATHS ETC.======================================================================*/
 
-  std::cout << cv::getBuildInformation() << std::endl;
-  std::cin.ignore();
+  // std::cout << cv::getBuildInformation() << std::endl;
+  // std::cin.ignore();
 
   // TODO these should be configurable without compiling -> read settings first
   //disable OpenCL to avoid the stutters

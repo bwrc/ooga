@@ -9,7 +9,7 @@
 
 #include "kalmanFilterGazePoint.h"
 
-#define DEFAULT_GAZE_DISTANCE 1.2
+#define DEFAULT_GAZE_DISTANCE 1.0
 
 //FrameProcessor::FrameProcessor(concurrent_queue<std::shared_ptr<TBinocularFrame>>* in,
 //	concurrent_queue<std::shared_ptr<TBinocularFrame>>* out)
@@ -168,7 +168,6 @@ void FrameProcessor::Process()
 	  cv::Point3d pupilCenter3DR, corneaCenter3DR;
 	  double thetaL, thetaR;
 
-	  /// Miikan muutos:
 	  TTrackingResult* resL = new TTrackingResult;
 	  TTrackingResult* resR = new TTrackingResult;
 
@@ -435,7 +434,7 @@ void FrameProcessor::Process()
 	msecs frameTime2 = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
 	msecs waitTime = msecs(30) - frameTime2;
 
-	std::cout << "frametime: " << frameTime2.count() << std::endl;
+	//std::cout << "frametime: " << frameTime2.count() << std::endl;
 
 	if (waitTime > msecs(0)){
 	  std::this_thread::sleep_for(waitTime);
@@ -469,7 +468,7 @@ void FrameProcessor::calibrationCallback( double x, double y)
 
   int Shori = 640;  // TODO: define elsewhere!
   int Svert = 480;  // TODO: define elsewhere!
-  double gaze_dist = 1.0;  // TODO: define elsewhere!
+  double gaze_dist = DEFAULT_GAZE_DISTANCE;  // TODO: define elsewhere!
   cv::Point3d target3D;
   cv::Mat tmp;
 
