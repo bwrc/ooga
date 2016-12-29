@@ -50,7 +50,7 @@ void OOGUI::SetLayout(int _layout){
 		aspect = 1280.0 / 720.0;
 		break;
 	}
-	glfwSetWindowSize(window, w, w / aspect);
+	glfwSetWindowSize(window, w, (int)(float(w) / aspect));
 
 	layout = _layout;
 }
@@ -376,23 +376,6 @@ void OOGUI::cursorPosFun(double x, double y)
 	sx = fmod(x, hw) / float(hw) * 640;
 	sy = fmod(y, hh) / float(hh) * 480;
 
-//	std::cerr << "cursor at " << sx << ", " << sy << "in win " << currentlyOnTopOf << std::endl;
-
-/*	switch (currentlyOnTopOf)
-	{
-	case 1:
-		do_redraw = true;
-		break;
-	case 3: //scene
-		do_redraw = true;
-		break;
-	case 4:
-		do_redraw = true;
-		break;
-	default:
-		break;
-	}
-*/
 	// Remember cursor position
 	xpos = x;
 	ypos = y;
@@ -493,6 +476,11 @@ void OOGUI::SetCalibrationCallback( std::function<void(double x, double y)> cal_
 	calCallback = cal_callback;
 }
 
+void OOGUI::SetPauseCallback( std::function<void(bool singleFrame)> pause_callback){
+	pauseCallback = pause_callback;
+}
+
+
 
 void OOGUI::key_callback(int key, int scancode, int action, int mods)
 {
@@ -512,15 +500,17 @@ void OOGUI::key_callback(int key, int scancode, int action, int mods)
 			else {
 				glfwSetCursor(window, cursor_normal);
 			}
-			modeCallBack(OOGA_MODE_CALIBRATE, getCalibrationSamples);
+			//modeCallBack(OOGA_MODE_CALIBRATE, getCalibrationSamples);
 			break;
 		case GLFW_KEY_N:
+			pauseCallback(true);
 			//todo: oogaCallBack( OOGA_NEXT_FRAME );
 			break;
 		case GLFW_KEY_R:
 			//todo: oogaCallBack( OOGA_MODE_CALIBRATE, true );
 			break;
 		case GLFW_KEY_SPACE:
+			pauseCallback(false);
 			//todo: oogaCallBack( OOGA_PAUSE );
 			break;
 		case GLFW_KEY_1:

@@ -37,7 +37,6 @@ void EyeTracker::InitAndConfigure(FrameSrc myEye,
 	//TODO: read all these from setting / function params:
 	int cols = 640;
 	int rows = 480;
-	//this->setCropWindowSize(150, 100, 350, 350);  // todo: we could crop heavier
 	//this->setCropWindowSize(170, 110, 250, 210);  // a heavier crop!
 	this->setCropWindowSize(cropWindow.x, cropWindow.y, cropWindow.width, cropWindow.height);
 	lambda_ed = 0.02;  // initial guess

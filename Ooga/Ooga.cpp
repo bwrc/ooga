@@ -42,6 +42,9 @@ environment: C:\Dev\gsl\x86\lib;C:\Dev\opencv3\bin\install\x86\vc12\bin;C:\Dev\b
 #include "oogaConstants.h"
 #include "SG_common.h"
 
+//moved here so the ESC callback can modify state
+static bool stopThisNonsense = false;
+
 
 void ModeCallBack(RunningModes mode, bool value){
 	switch (mode){
@@ -49,7 +52,8 @@ void ModeCallBack(RunningModes mode, bool value){
 		std::cout << "CALIBRATE" << std::endl;
 		break;
 	case (OOGA_MODE_RUNNING) :
-		std::cout << "RUN" << std::endl;
+		stopThisNonsense = true;
+		std::cout << "STOPPING" << std::endl;
 		break;
 	case (OOGA_MODE_PAUSED) :
 		std::cout << "PAUSE" << std::endl;
@@ -181,10 +185,11 @@ int _tmain(int argc, _TCHAR* argv[])
 
   OOGUI* oogui = new OOGUI();
   oogui->Initialize();
+  //set callbacks for GUI
   oogui->SetCallBackFunction( ModeCallBack );
-	oogui->SetCalibrationCallback( std::bind(&FrameProcessor::calibrationCallback, processor, std::placeholders::_1, std::placeholders::_2));
+  oogui->SetCalibrationCallback( std::bind(&FrameProcessor::calibrationCallback, processor, std::placeholders::_1, std::placeholders::_2));
+  oogui->SetPauseCallback( std::bind(&VideoIOHandler::pauseCallback, grabber, std::placeholders::_1 ));
 
-  bool stopThisNonsense = false;
   bool displayStats = true;
 
   int counter = 0;

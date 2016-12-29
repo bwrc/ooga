@@ -42,9 +42,11 @@ public:
 	void drawAllViews();
 
 	void drawViewPort(int num, int x, int y, int width, int height);
+
+	//callbacks for interaction
 	void SetCallBackFunction(std::function<void(RunningModes mode, bool value)> callback);
 	void SetCalibrationCallback( std::function<void( double x, double y)> cal_callback);
-
+	void SetPauseCallback( std::function<void(bool singleFrame)> pause_callback);
 	void SetLayout(int _layout);
 
 	void RenderState(int viewport);
@@ -66,6 +68,7 @@ private:
 
 	std::function<void(RunningModes, bool)> modeCallBack;
 	std::function<void(double, double)> calCallback;
+	std::function<void(bool)> pauseCallback;
 
 	std::vector<std::array<float, 3>> quadpoints;
 	std::vector<std::array<int, 3>> faces;

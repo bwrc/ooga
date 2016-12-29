@@ -168,8 +168,7 @@ void FrameProcessor::Process()
 	  cv::Point3d pupilCenter3DR, corneaCenter3DR;
 	  double thetaL, thetaR;
 
-	  /// Miikan muutos:
-	  TTrackingResult* resL = new TTrackingResult;
+	  TTrackingResult* resL = new TTrackingResult; //new'd here, pushed to frame
 	  TTrackingResult* resR = new TTrackingResult;
 
 	  //runs left in it's own thread and right here
@@ -385,7 +384,7 @@ void FrameProcessor::Process()
 
 	    for (auto& g : resR->glintPoints) {
 	      cv::circle(*temp, cv::Point2d(g.x, g.y),
-			 6, cv::Scalar(255, 0, 0), -1, 8);
+			 6, cv::Scalar(255, 0, 0), 2, 8);
 	    }
 	    for (auto& p : resR->pupilEllipsePoints){
 	    	cv::circle(*temp, cv::Point2d(p.x, p.y),
@@ -400,7 +399,7 @@ void FrameProcessor::Process()
 
 	    for (auto& g : resL->glintPoints) {
 	      cv::circle(*temp, cv::Point2d(g.x, g.y),
-			 6, cv::Scalar(255, 0, 0), -1, 8);
+			 6, cv::Scalar(255, 0, 0), 2, 8);
 	    }
 	    for (auto& p : resL->pupilEllipsePoints){
 	    	cv::circle(*temp, cv::Point2d(p.x, p.y),
@@ -419,8 +418,7 @@ void FrameProcessor::Process()
 	  msecs frameTime = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
 	  //std::cout << frameTime.count() << std::endl;  // print the computation time
 	
-
-	  // Save these into the  class variables, to be (possibly) used in the user calibration
+	  // Save these into the class variables, to hold the most recent values to be (possibly) used in the user calibration
 	  corneaCenter3D_left = resL->corneaCenter3D;
 	  pupilCenter3D_left = resL->pupilCenter3D;
 	  corneaCenter3D_right = resR->corneaCenter3D;

@@ -30,6 +30,12 @@ VideoIOHandler::~VideoIOHandler()
 	caps.clear();
 }
 
+void VideoIOHandler::pauseCallback(bool singleFrame )
+{
+	grabsingleframe = singleFrame;
+	this->pause();
+}
+
 
 /** Add a camera to grab
 *	\param cap a pointer to a VideoCapture from the calling entity

@@ -48,6 +48,8 @@ public:
 	//non-threaded videowrite:
 	//void setSaveState(bool state, std::string eyeFileName, std::string sceneFileName);
 
+    void pauseCallback(bool singleFrame);
+
 	//void pauseGrabber();// bool shouldPause);
 	void start();
 	void pause();
