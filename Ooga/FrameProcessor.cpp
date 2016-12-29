@@ -422,7 +422,7 @@ void FrameProcessor::Process()
 	msecs frameTime2 = std::chrono::duration_cast<msecs>(hrclock::now() - _start);
 	msecs waitTime = msecs(30) - frameTime2;
 
-	//std::cout << "frametime: " << frameTime2.count() << std::endl;
+	std::cout << "frametime: " << frameTime2.count() << std::endl;
 
 	if (waitTime > msecs(0)){
 	  std::this_thread::sleep_for(waitTime);
