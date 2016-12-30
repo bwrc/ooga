@@ -1,0 +1,63 @@
+
+* Install Ubuntu, at least 14 LTS or 16 LTS are both fine
+  - No need to install the 3rd party components (thought that doesn't hurt).
+  - Remember to install emacs etc. important tools
+
+* Install the following software libraries:
+  - Opencv
+  - Eigen
+  - GSL
+  - Boost
+  - GUI components (gl*)
+
+
+*** And how to install those: ***
+
+- install opencv:
+# Download: https://github.com/Itseez/opencv/archive/3.1.0.zip
+# Read this: http://docs.opencv.org/2.4/doc/tutorials/introduction/linux_install/linux_install.html#linux-installation
+# Copy: sudo cp /home/uni/software/opencv-3.1.0/3rdparty/ippicv/unpack/ippicv_lnx/lib/intel64/libippicv.a /usr/local/lib
+# Set: export LD_LIBRARY_PATH=/usr/local/lib/  (set this into .bashrc)
+
+- install eigen:
+# Download: http://bitbucket.org/eigen/eigen/get/3.3.0.zip
+# You might want to rename the unzipped folder (such as simply 'eigen')
+# No need to compile Eigen!
+
+- install gsl:
+# Download: www.nic.funet.fi/pub/gnu/ftp.gnu.org/pub/gnu/gsl/gsl-1.16.tar.gz
+# In the gsl folder, run: ./configure; make; sudo make install
+
+
+- install boost (not tested recently):
+./bootstrap.sh --prefix=/usr/local
+sudo ./b2 --buildtype=complete --with=all -j 4 install
+sudo sh -c 'echo "/usr/local/lib" >> /etc/ld.so.conf.d/local.conf'
+sudo ldconfig
+
+
+- install the GUI components:
+=============
+glfw3
+=============
+apt install libglfw3-dev (?)
+http://www.glfw.org/docs/latest/compile_guide.html
+
+=============
+GLEW
+=============
+'$ sudo apt-get install build-essential libxmu-dev libxi-dev libgl-dev libosmesa-dev'
+download latest release package from http://glew.sourceforge.net/index.html
+(the git version has additional problems in building)
+cd build
+cmake ./cmake
+make -j4
+sudo make install
+
+=============
+glm
+=============
+Download:
+http://glm.g-truc.net/0.9.8/index.html
+cmake .
+sudo make install
