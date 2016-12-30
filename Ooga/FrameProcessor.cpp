@@ -121,7 +121,8 @@ void FrameProcessor::blockWhilePaused(){
 void FrameProcessor::start()
 {
 	running = true;
-	zerotime = std::chrono::steady_clock::now();
+	//zerotime = std::chrono::steady_clock::now();
+	zerotime = hrclock::now();
 	m_thread = std::thread(&FrameProcessor::Process, this);
 }
 
@@ -286,6 +287,7 @@ void FrameProcessor::Process()
 	    }
 	  }
 
+		double gaze_dist_left, gaze_dist_right;
 	  if (using_both_eyes) {
 
 	    cv::Point3d cr = resR->corneaCenter3D;  // Right cornea center
@@ -298,8 +300,8 @@ void FrameProcessor::Process()
 	    // double gaze_dist_right = cl.dot(gr) - cr.dot(gr) + gaze_dist_left2*gl.dot(gr);
 
 	    // Here the left and right gaze vectors are taken to be equally long which length is computed from simple trigonometry. This approach results in more robust estimate.
-	    double gaze_dist_left = 0.5*norm(cr - cl) / sin(0.5*acos(gl.dot(gr)));
-	    double gaze_dist_right = gaze_dist_left;
+	    gaze_dist_left = 0.5*norm(cr - cl) / sin(0.5*acos(gl.dot(gr)));
+	    gaze_dist_right = gaze_dist_left;
 
 	    gazePoint_ecam = (cv::Point3d(cl + gaze_dist_left*gl) + cv::Point3d(cr + gaze_dist_right*gr)) / 2;  // The computed gaze point is in the right (user's right) eye cam coordinates
 	  }
@@ -406,6 +408,19 @@ void FrameProcessor::Process()
 	    		6, cv::Scalar(0, 255, 0), -1, 8);
 	    }
 	  }
+
+		//save results
+		frame->gazeres.timestamp = std::chrono::duration_cast<msecs>(hrclock::now() - zerotime);
+		frame->gazeres.pog = pog_scam;
+    frame->gazeres.gazedist = gaze_dist_right;
+    frame->gazeres.score_l = resL->score;
+    frame->gazeres.score_r = resR->score;
+		if( blinking ){ frame->gazeres.state = 0; }
+		else{
+			if( using_both_eyes ){ frame->gazeres.state = 3; }
+			else if( best_eye_ind == 0 ){ frame->gazeres.state = 1; }
+			else{ frame->gazeres.state = 2;}
+		}
 
 	  //qOut->enqueue(frame);
 	  qOut->push(frame); //this doesn't probably need the balancing behavior? so could be a concurrent_queue as well..?

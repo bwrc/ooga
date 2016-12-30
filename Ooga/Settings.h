@@ -64,6 +64,14 @@ public:
 	std::string cam_left_eye_file;
 	std::string cam_right_eye_file;
 
+	//result handling
+	bool saveVideos = false;
+	bool saveResults = false;
+	bool streamLSL = false;
+	std::string video_folder;
+	std::string result_file;
+	std::string LSL_streamname;
+
 	int nOfCams = 3;
 
 	bool saveFrames = false;

@@ -455,7 +455,7 @@ void OOGUI::mouseButtonFun( int button, int action, int mods)
 			double sx, sy; //scaled
 
 			sx = fmod((x - offset_w), hw) / hw*640.0;
-			sy = fmod((y - offset_h), hh) / hh*640.0;
+			sy = fmod((y - offset_h), hh) / hh*480.0;
 
 			//		sx = fmod(x, hw) / float(hw) * 640;
 			//		sy = fmod(y, hh) / float(hh) * 480;

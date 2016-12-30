@@ -159,6 +159,28 @@ void TSettings::loadSettings(std::string filename)
 	cam_left_eye_file = tree.get<std::string>("settings.calibration.cam_lefteye.<xmlattr>.filename", "../calibration/eye_cam_left.yaml");
 	cam_right_eye_file = tree.get<std::string>("settings.calibration.cam_righteye.<xmlattr>.filename", "../calibration/eye_cam_right.yaml");
 	LED_pos_file = tree.get<std::string>("settings.calibration.led_positions.<xmlattr>.filename", "../calibration/LED_positions.model.yaml");
+
+	//result handling
+	std::string tmp;
+	video_folder="";
+	result_file="";
+	LSL_streamname="";
+	tmp = tree.get<std::string>("settings.results.videos.<xmlattr>.save", "no");
+	if(std::strcmp(tmp.c_str(), "yes")==0){
+		saveVideos = true;
+		video_folder = tree.get<std::string>("settings.results.videos.<xmlattr>.folder", "../videos/");
+	}
+	tmp = tree.get<std::string>("settings.results.resultfile.<xmlattr>.save", "no");
+	if(std::strcmp(tmp.c_str(), "yes")==0){
+		saveResults = true;
+		result_file = tree.get<std::string>("settings.results.resultfile.<xmlattr>.filename", "../results/tmp.log");
+	}
+	tmp = tree.get<std::string>("settings.results.LSL.<xmlattr>.stream", "no");
+	if(std::strcmp(tmp.c_str(), "yes")==0){
+		streamLSL = true;
+		LSL_streamname = tree.get<std::string>("settings.results.LSL.<xmlattr>.streamname", "OOGA_STREAM");
+	}
+
 }
 
 void TSettings::saveSettings(std::string filename)

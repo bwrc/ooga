@@ -43,6 +43,8 @@ public:
 	void setTrackingResult(TTrackingResult tr){ /*trackres = tr;*/ };
 	TTrackingResult getTrackingResult(){ /*return trackres;*/ };
 
+	TGazeTrackingResult gazeres; //KL
+
 private:
 
 	//by hiding these unique_ptr copy shouldn't be an issue on VS?

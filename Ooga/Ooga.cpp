@@ -41,6 +41,7 @@ environment: C:\Dev\gsl\x86\lib;C:\Dev\opencv3\bin\install\x86\vc12\bin;C:\Dev\b
 #include "../utils/OOGUI.h"
 #include "oogaConstants.h"
 #include "SG_common.h"
+#include "ResultHandler.h"
 
 //moved here so the ESC callback can modify state
 static bool stopThisNonsense = false;
@@ -96,6 +97,16 @@ int _tmain(int argc, _TCHAR* argv[])
   }
 
   settings->loadSettings(settings->configFile);
+
+  // SET UP result handler, if results should be saved ========================
+  ResultHandler* rhandler = new ResultHandler();
+  if(settings->saveResults){
+	if(!rhandler->SetFile(settings->result_file) ){
+		delete settings;
+		delete rhandler;
+		return 0;
+	}
+  }
 
   /* SET UP queues, threads, etc.  =======================================================================*/
   //initialize queues
@@ -198,6 +209,7 @@ int _tmain(int argc, _TCHAR* argv[])
   grabber->start();
   processor->start();
 
+  if(settings->saveResults) rhandler->writeHeader( settings->configFile, hrclock::now());
 
   //MAIN LOOP visualizing the results
   while (!stopThisNonsense){
@@ -230,9 +242,13 @@ int _tmain(int argc, _TCHAR* argv[])
 
 		oogui->pushFrame(*myframe);
 
+
+
 	  counter++;
 	  //std::cout << counter << std::endl;
 	  //if (counter==10) exit(8);
+
+  	if(settings->saveResults) rhandler->pushSample( myframe->gazeres );
 
 	  //delete myframe;
 	  myframe.reset();
@@ -283,6 +299,8 @@ int _tmain(int argc, _TCHAR* argv[])
   cams.clear();
 
   delete grabber;
+  rhandler->close();
+  delete rhandler;
 
   //delete limiter;
 

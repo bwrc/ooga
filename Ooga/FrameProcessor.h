@@ -79,7 +79,8 @@ private:
 	cv::Mat K9_left;
 	cv::Mat K9_right;
 
-	std::chrono::steady_clock::time_point zerotime;
+	//std::chrono::steady_clock::time_point zerotime;
+	hrclock::time_point zerotime;
 
 	//TPerformanceTimer *ptimer;
 

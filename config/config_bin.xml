@@ -23,7 +23,7 @@
 			<num>2</num>
 			<file>../videos/sg01_cam2.mjpg</file>
 			<flip>0</flip>
-		</eyeleft>
+		</eyeright>
 		<scene type="video">
 			<num>0</num>
 			<file>../videos/sg01_cam3.mjpg</file>
@@ -46,18 +46,14 @@
 
 	<!--
 	how to handle the results:
-		<savevideos>1 = yes, 0 = no</savevideos>
-		<videofolder>resvideos/</videofolder>
-		<output>txt</output>
-		<streamdata>1 = yes, 0 = no</streamdata>
-		<LSL streamname="insert stream name" streamtype="VOG"/>
+		<videos save="yes" folder="../videos/"/> 
+		<results save="yes" filename="../results/test.txt"/>
+		<LSL stream="no" streamname="OOGA_STREAM"/>
 	-->
 	<results>
-		<savevideos>0</savevideos>
-		<videofolder>resvideos/</videofolder>
-		<output>txt</output>
-		<streamdata>0</streamdata>
-		<LSL streamname="SG_stream" streamtype="VOG"/>
+		<videos save="yes" folder="../videos/"/> <!-- with trailing slash -->
+		<resultfile save="yes" filename="../results/test.txt"/>
+		<LSL stream="no" streamname="OOGA_STREAM"/>
 	</results>
 
 </settings>
